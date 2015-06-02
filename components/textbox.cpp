@@ -177,6 +177,7 @@ unsigned int buildText(TextBox* tb, unsigned int start, std::vector<std::wstring
 TextBox::TextBox(unsigned int loc)
 {
 	this->index = loc;
+	this->current = 0;
 	
 	// Add this component to the global keyword map
 	this-addKW(L"textbox", &buildTextBox);

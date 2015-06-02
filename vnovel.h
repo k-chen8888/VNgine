@@ -49,6 +49,7 @@ class VNovel
 		
 		std::vector<Frame*> f;         // VN components, stored in Frame objects
 		int curr_frame;                // Index of current frame in vector (-1 means empty vector)
+		int current;                   // Index of current frame in vector (playback only)
 		
 		std::vector<std::wstring> err; // Error messages
 		

@@ -49,7 +49,7 @@ class Component3 : public Component2
 		// Play the component
 		// Return:
 		// 	-1 if there are more things to be played
-		// 	Index to the next component otherwise
+		// 	Index to the next component otherwises
 		// virtual int play(bool gui);
 }
 

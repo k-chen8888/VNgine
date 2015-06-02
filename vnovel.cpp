@@ -102,6 +102,7 @@ VNovel::VNovel(wstring src)
 {
 	this->source = src;
 	this->curr_frame = -1;
+	this->current = 1;
 	
 	//Set unicode input/output
 	int e = setUnicode(true, true);
@@ -285,11 +286,9 @@ int VNovel::buildNext(vector<pair<int, wstring>> params)
 // Plays the visual novel
 int playNovel(bool gui)
 {
-	unsigned int i = 0;
-	
 	while(i < this->f.size())
 	{
-		i = this->f[curr_frame]->play(gui);
+		this->current = this->f[this->current]->play(gui);
 	}
 	
 	return 0;

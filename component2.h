@@ -137,9 +137,7 @@ class Component2
 		/* Playback */
 		
 		// Play the component
-		// Return:
-		// 	-1 if there are more things to be played
-		// 	Index to the next component otherwise
+		// Return index to the next component
 		virtual int play(bool gui) = 0;
 }
 

@@ -392,7 +392,7 @@ int Frame::play(bool gui)
 	if(this->comp.size() <= this->current)
 		out = this->current - this->comp.size(); // Calculate next Frame's index
 	else
-		out = this->index;
+		out = this->index + 1;
 	
 	return out;
 };

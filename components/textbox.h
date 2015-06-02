@@ -98,18 +98,16 @@ class TextBox : public Component2
 		/* Playback */
 		
 		// Play the component
-		// Return:
-		// 	-1 if there are more things to be played
-		// 	Index to the next component otherwise
+		// Return index to the next component
 		int play(bool gui)
 		{
-			int out = -1;
-			int index = 0;
-			
-			while(out == -1 && index < this->comp.size())
+			while(out == -1 && this->current < this->content.size())
 			{
-				out = 
+				out = this->content[out]->play(gui);
+				this->current += 1;
 			}
+			
+			return out;
 		};
 		
 		/* Reporting */
