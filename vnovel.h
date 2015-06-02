@@ -19,14 +19,20 @@
 
 /* Control functions */
 
+// Add parameter to a frame
+void addFrameParam(Frame* f, std::vector<std::pair<int, std::wstring>> params);
+
+// End a frame, closing out all frozen and active components
+void endFrame(Frame* f, std::vector<std::pair<int, std::wstring>> params);
+
 // Freeze a component
-Component2* freezeComp(Frame* f, Component2* comp, std::vector<std::pair<int, std::wstring>> params);
+void freezeComp(Frame* f, std::vector<std::pair<int, std::wstring>> params);
 
 // Unfreeze a component
-Component2* unFreezeComp(Frame* f, Component2* comp, std::vector<std::pair<int, std::wstring>> params);
+void unFreezeComp(Frame* f, std::vector<std::pair<int, std::wstring>> params);
 
 // End a component
-Component2* endComp(Frame* f, Component2* comp, std::vector<std::pair<int, std::wstring>> params);
+void endComp(Frame* f, std::vector<std::pair<int, std::wstring>> params);
 
 /************************************************
  * Visual Novel object
@@ -66,7 +72,12 @@ class VNovel
 		int buildVN();
 		
 		// Builds the next VN component or update an existing one
-		int buildNext(vector<pair<int, wstring>> params);
+		int buildNext(std::vector<pair<int, std::wstring>> params);
+		
+		/* Playback */
+		
+		// Plays the visual novel
+		int playNovel(bool gui);
 		
 		/* Reporting */
 		

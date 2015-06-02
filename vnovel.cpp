@@ -35,7 +35,7 @@ using namespace std;
 /* Control functions */
 
 // Add parameter to a frame
-Component2* addFrameParam(Frame* f, Component2* comp, vector<wstring> params)
+void addFrameParam(Frame* f, Component2* comp, vector<wstring> params)
 {
 	if(f != NULL)
 	{
@@ -45,29 +45,43 @@ Component2* addFrameParam(Frame* f, Component2* comp, vector<wstring> params)
 	return NULL;
 }
 
-// Freeze a component
-Component2* freezeComp(Frame* f, Component2* comp, vector<wstring> params)
+// End a frame, closing out all frozen and active components
+void endFrame(Frame* f, vector<pair<int, wstring>> params)
 {
-	if(comp != NULL) // Found a component to freeze
+	// Clean up active component
+	endComp(f, params);
+	
+	// Clean up frozen components
+	while(f->frz.size() > 0)
 	{
-		f->freeze(comp);
+		unFreezeComp(f, params);
+		endComp(f, params);
 	}
+};
+
+// Freeze a component
+void freezeComp(Frame* f, vector<pair<int, wstring>> params)
+{
+	// Freeze active component if there is one
+	f->freeze();
 	
 	return NULL;
 };
 
 // Unfreeze a component
-Component2* unFreezeComp(Frame* f, Component2* comp, vector<wstring> params)
+void unFreezeComp(Frame* f, Component2* comp, vector<pair<int, wstring>> params)
 {
-	int err = f->unfreeze();
+	// Unfreeze component if there is a frozen component
+	f->unfreeze();
 	
 	return NULL;
 };
 
 // End a component
-Component2* endComp(Frame* f, Component2* comp, vector<wstring> params)
+void endComp(Frame* f, Component2* comp, vector<pair<int, wstring>> params)
 {
-	if(comp != NULL) // Found a component to end
+	Component2* comp = f->getActiveComp();
+	if(comp != NULL)
 	{
 		comp->setEnd(f->getNumComp());
 	}
@@ -102,6 +116,7 @@ VNovel::VNovel(wstring src)
 	
 	// Add keywords
 	this->addKW(L"f_param", &addFrameParam); // Add frame parameters
+	this->addKW(L"endframe");
 	this->addKW(L"freeze", &freezeComp);     // Freeze current active component inside frame
 	this->addKW(L"unfreeze", &unFreezeComp); // Freeze current active component inside frame
 	this->addKW(L"endcomp", &endComp);       // End a component
@@ -227,8 +242,8 @@ int VNovel::buildNext(vector<pair<int, wstring>> params)
 		case COMP_OPEN:
 			if(data.second == L"Frame")
 			{
-				Frame temp = new Frame(0);
 				this->curr_frame += 1;
+				Frame temp = new Frame(this->curr_frame);
 				
 				this->f[this->curr_frame].push_back(temp);
 				
@@ -236,7 +251,7 @@ int VNovel::buildNext(vector<pair<int, wstring>> params)
 			}
 			else
 			{
-				keywords[ params[i].second ](this->f[this->curr_frame], NULL, params);
+				keywords[ params[i].second ](this->f[this->curr_frame], params);
 			}
 			
 			break;
@@ -250,7 +265,7 @@ int VNovel::buildNext(vector<pair<int, wstring>> params)
 			}
 			else
 			{
-				keywords[ L"f_param" ](this->f[this->curr_frame], NULL, params);
+				keywords[ L"f_param" ](this->f[this->curr_frame], params);
 			}
 			
 			break;
@@ -260,6 +275,21 @@ int VNovel::buildNext(vector<pair<int, wstring>> params)
 		// Everything else
 		default:
 			break;
+	}
+	
+	return 0;
+};
+
+/* Playback */
+
+// Plays the visual novel
+int playNovel(bool gui)
+{
+	unsigned int i = 0;
+	
+	while(i < this->f.size())
+	{
+		i = this->f[curr_frame]->play(gui);
 	}
 	
 	return 0;

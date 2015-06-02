@@ -131,8 +131,8 @@ class Frame
 		// Component is no longer being edited
 		int addComponent();
 		
-		// Freeze a component (no longer being edited)
-		int freeze(Component2* c);
+		// Freeze active component (no longer being edited)
+		int freeze();
 		
 		// Unfreeze the last frozen component (the one on the top of the stack) (may be edited again)
 		int unfreeze();
@@ -141,7 +141,7 @@ class Frame
 		
 		// Play through components (to GUI if gui == true, otherwise, to a command line)
 		// Output the index of the next frame to jump to
-		unsigned int play(bool gui);
+		int play(bool gui);
 		
 		// Draws the background using the images in the order specified
 		int drawBG(std::vector<int> order);

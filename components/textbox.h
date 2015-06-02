@@ -22,7 +22,7 @@ enum TextBoxColor = {WHITE, BLACK, RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
 /* Various TextBox builder functions */
 
 // Master function that accesses the keyword maps
-Component2* buildTextBox(Frame* f, Component2* tb, std::vector<std::pair<int, std::wstring>> params);
+void buildTextBox(Frame* f, std::vector<std::pair<int, std::wstring>> params);
 
 // Builds the L3 components for this component (the only one that can be built is Text)
 // Output location where this function stopped reading through params
@@ -103,7 +103,13 @@ class TextBox : public Component2
 		// 	Index to the next component otherwise
 		int play(bool gui)
 		{
+			int out = -1;
+			int index = 0;
 			
+			while(out == -1 && index < this->comp.size())
+			{
+				out = 
+			}
 		};
 		
 		/* Reporting */

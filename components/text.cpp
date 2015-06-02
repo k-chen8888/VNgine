@@ -53,6 +53,9 @@ Text::Text(int x, int y)
 	// Index of Frame SFX to use
 	// -1 uses no SFX
 	this->mod[L"framesfx"] = -1;
+	
+	// Pause after outputting this line of text (0 means no, 1 means yes)
+	this->mod[L"p"] = PAUSE;
 };
 
 /*******************************************

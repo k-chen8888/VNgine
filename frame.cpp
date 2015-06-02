@@ -373,14 +373,14 @@ int Frame::unfreeze()
 
 // Play through components
 // Output the index of the next frame to jump to
-unsigned int Frame::play(bool gui)
+int Frame::play(bool gui)
 {
-	unsigned int out = 0;
+	int out = 0;
 	
 	// Playback must return the index of the next component to play
 	int next = -1; // -1 means keep playing this component
 
-	while(next == -1)
+	while(next < 0)
 	{
 		next = this->comp[this->current]->play(gui);
 	}
@@ -388,6 +388,7 @@ unsigned int Frame::play(bool gui)
 	// Save the index of the next component
 	this->current = next;
 	
+	// The next frame is how much the output overshoots the number of frames
 	if(this->comp.size() <= this->current)
 		out = this->current - this->comp.size(); // Calculate next Frame's index
 	else

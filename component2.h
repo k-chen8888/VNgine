@@ -9,7 +9,7 @@
 // typedef for generic function used to create/modify an L3 component
 // L2 Component should know what it wants to build based on where output will be stored
 // Traverses a parameter string from a starting position and outputs where it ends up
-unsigned int (*buildL3Comp)(Component2*, unsigned int, std::vector<std::wstring>);
+unsigned int (*buildL3Comp)(Component2*, unsigned int, std::vector<std::pair<int, std::wstring>>);
 
 
 /* Abstract base class that all L2 components must use
@@ -19,6 +19,8 @@ class Component2
 	protected:
 		std::map<std::wstring, int> mod;        // Modifiers
 		std::map<std::wstring, buildL3Comp> l3; // Create/modify an L3 component
+		
+		std::vector<int> next;                  // Index for possible next components/frames to play
 	
 	public:
 		/*******************************************
@@ -54,6 +56,13 @@ class Component2
 		{
 			if(this->mod.count(k) == 1)
 			{
+				// Special case: boolean values
+				if(v == L"+1")
+				{
+					this->mod[k] = (this->mod[k] + 1) % 2;
+					return 0;
+				}
+				
 				// Perform conversion to integer and store
 				int val = 0;
 				int t_val = 0;

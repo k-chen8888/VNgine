@@ -18,13 +18,15 @@ enum TextColor = {WHITE, BLACK, RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
 #define YPOS     10
 #define COLOR    1
 #define FONTSIZE 12
+#define PAUSE    0
+
 
 /************************************************
  * VNovel Text object
  * 
  * String that is written onto screen by its parent component
  ************************************************/
-class Text : Component3
+class Text : public Component3
 {
 	private:
 		std::wstring content; // Text to be displayed
@@ -69,7 +71,39 @@ class Text : Component3
 		// 	Index to the next component otherwise
 		int play(bool gui)
 		{
+			if(gui)
+			{
+				
+			}
+			else
+			{
+				if(this->content.length() > 0)
+				{
+					// Display content
+					wcout << this->content;
+					
+					// Ask to press enter
+					if(this->mod[L"p"] == 1)
+					{
+						wcout << "\nPress enter to continue...\n";
+						wcin.ignore( numeric_limits <streamsize> ::max(), '\n' );
+					}
+				}
+				
+				// Jump to the next component on a freeze
+				if(this->freeze > -1)
+				{
+					return this->freeze;
+				}
+				
+				// Jump to the next component on component end
+				if(this->end > -1)
+				{
+					return this->end;
+				}
+			}
 			
+			return -1;
 		};
 		
 		/* Reporting */

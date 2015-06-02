@@ -35,16 +35,16 @@
  * Procedure (create): Happens when there are no other arguments and second argument is NULL
  * 	1. Create object
  *  2. Create a Component pointer and set it to address of new component
- * 	3. Return Component pointer
+ * 	3. Update active component
  * 
  * Procedure (update):
  *  1. Cast the void* as the correct type
  * 	2. Look for property in component's property map
  *  	a. No property -> text token
  * 	3. Perform update
- * 	4. Return NULL
+ * 	4. Update active component only if component is no longer active
  */
-typedef Component2* (*buildComp)(Frame*, Component2*, std::vector<std::pair<int, std::wstring>>);
+typedef void (*buildComp)(Frame*, std::vector<std::pair<int, std::wstring>>);
 
 
 /* Global variables and special definitions */

@@ -21,19 +21,16 @@ using namespace std;
 /* Various TextBox builder functions */
 
 // Master function that accesses the keyword map
-Component2* buildTextBox(Frame* f, Component2* tb, std::vector<string> params)
+Component2* buildTextBox(Frame* f, std::vector<string> params)
 {
-	Component2* c = NULL;
+	Component2* comp = f->getActiveComp();
 	bool txt = false;
 	
-	if(tb == NULL)
+	// No active component; make a new one
+	if(comp == NULL)
 	{
-		TextBox out (f->getNumComp());
-		c = &out;
-	}
-	else
-	{
-		c = tb;
+		TextBox out = new TextBox(f->getNumComp());
+		comp = &out;
 	}
 	
 	// Process modifiers, if any
@@ -47,7 +44,7 @@ Component2* buildTextBox(Frame* f, Component2* tb, std::vector<string> params)
 				if( params[i + 1].first == PARAM_VAL )
 				{
 					// Attempt to add modifier
-					if(c->setModifier(params[i].second, params[i + 1].second) == 0)
+					if(comp->setModifier(params[i].second, params[i + 1].second) == 0)
 					{
 						i += 1;
 					}
@@ -62,19 +59,19 @@ Component2* buildTextBox(Frame* f, Component2* tb, std::vector<string> params)
 			// L3 Component
 			case L3_COMP:
 				// Attempt to build L3 Component
-				i = c->buildL3(i, params);
+				i = comp->buildL3(i, params);
 				break;
 			
 			// L3 Parameter
 			case L3_PARAM:
 				// Implicitly build a new L3 Text Component
-				i = buildText(c, i, params);
+				i = buildText(comp, i, params);
 				break;
 			
 			// Text to be outputted
 			case TXT_TOKEN:
 				// Implicitly build a new L3 Text Component
-				i = buildText(c, i, params);
+				i = buildText(comp, i, params);
 				break;
 			
 			// All other cases
@@ -133,16 +130,19 @@ unsigned int buildText(TextBox* tb, unsigned int start, std::vector<std::wstring
 			
 			// L3 parameter
 			case L3_PARAM:
-			// Check for parameter value delimiter immediately afterwards
+				// Check for parameter value delimiter immediately afterwards
 				if( params[i + 1].first == PARAM_VAL )
 				{
-					if(t->setModifier(params[i].second, params[i + 1].second) == 0)
+					if( t->setModifier(params[i].second, params[i + 1].second) == 0 )
 					{
 						i += 1;
 					}
 				}
 				else
 				{
+					// Check for boolean parameter values
+					if( t->setModifier(params[i].second, L"+1") == 0 ) { }
+					
 					// Discard as invalid L3_PARAM declaration
 				}
 				

@@ -46,7 +46,7 @@ void checkKeyword(std::wstring kw)
 };
 
 // Removes escape characters
-wstring escape(wstring token, vector<unsigned int> e)
+wstring escape(std::wstring token, std::vector<unsigned int> e)
 {
 	wstring out;
 	int start = 0;
