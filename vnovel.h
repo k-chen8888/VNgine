@@ -20,13 +20,13 @@
 /* Control functions */
 
 // Freeze a component
-Component2* freezeComp(Frame* f, Component2* comp, std::vector<std::wstring> params);
+Component2* freezeComp(Frame* f, Component2* comp, std::vector<std::pair<int, std::wstring>> params);
 
 // Unfreeze a component
-Component2* unFreezeComp(Frame* f, Component2* comp, std::vector<std::wstring> params);
+Component2* unFreezeComp(Frame* f, Component2* comp, std::vector<std::pair<int, std::wstring>> params);
 
 // End a component
-Component2* endComp(Frame* f, Component2* comp, std::vector<std::wstring> params)
+Component2* endComp(Frame* f, Component2* comp, std::vector<std::pair<int, std::wstring>> params);
 
 /************************************************
  * Visual Novel object
@@ -41,7 +41,7 @@ class VNovel
 		std::wstring source;           // Script file to build VN from
 		std::vector<wchar_t> ignore;   // Clean these out of the front and back of stored strings
 		
-		std::vector<Frame*> f;          // VN components, stored in Frame objects
+		std::vector<Frame*> f;         // VN components, stored in Frame objects
 		int curr_frame;                // Index of current frame in vector (-1 means empty vector)
 		
 		std::vector<std::wstring> err; // Error messages
@@ -66,16 +66,7 @@ class VNovel
 		int buildVN();
 		
 		// Builds the next VN component or update an existing one
-		int buildNext(int d, std::wstring compname);
-		
-		// Set ignored characters
-		void setIgnore(std::vector<wchar_t> i);
-		
-		// Strips ignored characters
-		std::wstring strip(std::wstring token);
-		
-		// Removes escape characters
-		std::wstring escape(std::wstring token, std::vector<unsigned int> e);
+		int buildNext(vector<pair<int, wstring>> params);
 		
 		/* Reporting */
 		

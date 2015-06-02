@@ -22,14 +22,11 @@ enum TextBoxColor = {WHITE, BLACK, RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
 /* Various TextBox builder functions */
 
 // Master function that accesses the keyword maps
-Component2* buildTextBox(Frame* f, Component2* tb, std::vector<string> params);
+Component2* buildTextBox(Frame* f, Component2* tb, std::vector<std::pair<int, std::wstring>> params);
 
 // Builds the L3 components for this component (the only one that can be built is Text)
 // Output location where this function stopped reading through params
-unsigned int buildText(TextBox* tb, unsigned int start, std::vector<std::wstring> params);
-
-// Builds an L3 component that represents the end of the L2 component
-unsigned int buildEnd(TextBox* tb, unsigned int start, std::vector<std::wstring> params);
+unsigned int buildText(TextBox* tb, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
 
 
 /************************************************
@@ -45,7 +42,7 @@ class TextBox : public Component2
 	private:
 		unsigned int index;                       // Identifying index
 		
-		std::vector<Text::Text> content;          // Text to be displayed
+		std::vector<Text::Text*> content;         // Text to be displayed
 		std::vector<std::pair<int, int>> sprites; // Index of sprites that will be onscreen when text is displayed (limit 2 at a time)
 		unsigned int current;                     // Current position in content vector
 		
@@ -66,11 +63,11 @@ class TextBox : public Component2
 		
 		// Create/modify an L3 component
 		// Output location where this function stopped reading through params
-		int buildL3(unsigned int start, std::vector<std::wstring> params)
+		int buildL3(unsigned int start, std::vector<std::pair<int, std::wstring>> params)
 		{
-			if(this->l3.count(params[start]) == 1)
+			if(this->l3.count(params[start].second) == 1)
 			{
-				return this->l3[params[start]](this, start + 1, params);
+				return this->l3[params[start].second](this, start + 1, params);
 			}
 			else
 			{
@@ -79,7 +76,7 @@ class TextBox : public Component2
 		};
 		
 		// Append to content vector
-		void addText(Text t)
+		void addText(Text::Text* t)
 		{
 			this->content.push_back(t);
 		};
@@ -89,7 +86,6 @@ class TextBox : public Component2
 		{
 			Text t(-1, -1);
 			t->setFreeze(next);
-			this->hasfrz = true;
 		};
 		
 		// Set the end position
@@ -116,12 +112,6 @@ class TextBox : public Component2
 		{
 			return this->index;
 		};
-		
-		// Check if this TextBox is ever frozen
-		bool hasFreeze()
-		{
-			return this->frz;
-		}
 		
 		// Check if this TextBox has an end component
 		bool hasEnd()

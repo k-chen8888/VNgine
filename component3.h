@@ -15,7 +15,7 @@ class Component3
 		
 		int freeze;                      // > -1 implies a freeze after playing this, as well as where to go
 		int end;                         // > -1 implies the end of parent L2 component after playing this, as well as where to go
-		
+	
 	public:
 		/*******************************************
 		 * Functions
@@ -50,7 +50,64 @@ class Component3
 		{
 			if(this->mod.count(k) == 1)
 			{
-				this->mod[k] = std::stoi(v);
+				// Perform conversion to integer and store
+				int val = 0;
+				int t_val = 0;
+				int pos = 0;
+				while(pos < v.length())
+				{
+					switch(v.at(pos))
+					{
+						case L'0':
+							t_val = 0;
+							break;
+						
+						case L'1':
+							t_val = 1;
+							break;
+						
+						case L'2':
+							t_val = 2;
+							break;
+						
+						case L'3':
+							t_val = 3;
+							break;
+						
+						case L'4':
+							t_val = 4;
+							break;
+						
+						case L'5':
+							t_val = 5;
+							break;
+						
+						case L'6':
+							t_val = 6;
+							break;
+						
+						case L'7':
+							t_val = 7;
+							break;
+						
+						case L'8':
+							t_val = 8;
+							break;
+						
+						case L'9':
+							t_val = 9;
+							break;
+						
+						// Not an integer
+						default:
+							return -1;
+					}
+					
+					val = val * 10 + t_val;
+					pos += 1;
+				}
+				
+				this->mod[k] = val;
 			}
 			else
 			{

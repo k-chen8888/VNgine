@@ -36,11 +36,30 @@
 #define HAS_ACTIVE       -11
 #define HAS_ACTIVE_ERR   std::wstring(L"[Frame Error -11] Tried to add an active frame, but there was already one in existance (compensating by auto-ending frame)")
 
-
 #define FRZ_EMPTY        -12
 #defint FRZ_EMPTY_ERR    std::wstring(L"[Frame Error -12] Unable to unfreeze component; no frozen components found")
 
+
+// typedef for control functions
+void (*addObj)(Frame*, std::wstring);
+
+
 /* Control functions */
+		
+// Set Frame name
+void setName(Frame* f, std::wstring n);
+
+// Add a background image
+void addBG(Frame* f, std::wstring bgfile);
+
+// Add a bgm file
+void addBGM(Frame* f, std::wstring bgmfile);
+
+// Add a sound effect file
+void addSFX(Frame* f, std::wstring sfxfile);
+
+// Add a sprite image file
+void addSprite(Frame* f, std::wstring spritefile);
 
 
 /************************************************
@@ -54,21 +73,22 @@
 class Frame
 {
 	private:
-		std::wstring name;                    // Identifying name
-		unsigned int index;                   // Identifying index
+		std::wstring name;                        // Identifying name
+		unsigned int index;                       // Identifying index
 		
-		// Frame objects
-		std::map<std::wstring, std::vector<std::wstring>> obj;
+		// Frame objects and a way to access them
+		std::map<std::wstring, std::wstring> obj; // Frame objects
+		std::map<std::wstring, addObj> mod;       // Add frame objects using referenced function
 		
 		// Editing variables
-		Component2* active;                   // Component being edited
-		std::vector<Component2*> frz;         // Vector (stack) containing frozen components and their corresponding playback function
+		Component2* active;                       // Component being edited
+		std::vector<Component2*> frz;             // Vector (stack) containing frozen components and their corresponding playback function
 		
 		// Playback variables
-		std::vector<Component2*> comp;        // Vector containing the component
-		unsigned int current;                 // Index of current component being played
+		std::vector<Component2*> comp;            // Vector containing the component
+		unsigned int current;                     // Index of current component being played
 		
-		std::vector<std::wstring> err;        // Error messages
+		std::vector<std::wstring> err;            // Error messages
 		
 		// Private default constructor
 		Frame() { }
@@ -87,7 +107,7 @@ class Frame
 		int addKW(std::wstring kw, buildComp b);
 		
 		// Add non-component data to the frame
-		int setData(std::vector<std::wstring> params);
+		void setData(std::vector<std::wstring> params);
 		
 		// Set Frame name
 		int setName(std::wstring n);

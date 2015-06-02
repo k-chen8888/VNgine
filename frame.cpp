@@ -23,6 +23,59 @@
 using namespace std;
 
 
+/* Control functions */
+		
+// Set Frame name
+void setFrameName(Frame* f, std::wstring n)
+{
+	int err = f->setName(n);
+	if(err < 0)
+	{
+		wcout << n << " threw error code " << err;
+	}
+};
+
+// Add a background image
+void addBGToFrame(Frame* f, std::wstring bgfile)
+{
+	int err = f->addBG(bgfile);
+	if(err < 0)
+	{
+		wcout << bgfile << " threw error code " << err;
+	}
+};
+
+// Add a bgm file
+void addBGMToFrame(Frame* f, std::wstring bgmfile)
+{
+	int err = f->addBGM(bgmfile);
+	if(err < 0)
+	{
+		wcout << bgmfile << " threw error code " << err;
+	}
+};
+
+// Add a sound effect file
+void addSFXToFrame(Frame* f, std::wstring sfxfile)
+{
+	int err = f->addSFX(sfxfile);
+	if(err < 0)
+	{
+		wcout << sfxfile << " threw error code " << err;
+	}
+};
+
+// Add a sprite image file
+void addSpriteToFrame(Frame* f, std::wstring spritefile)
+{
+	int err = f->addSprite(spritefile);
+	if(err < 0)
+	{
+		wcout << spritefile << " threw error code " << err;
+	}
+};
+
+
 /************************************************
  * Visual Novel Frame
  * 
@@ -41,22 +94,30 @@ Frame::Frame(unsigned int loc)
 	
 	// Add frame object holders to map
 	vector<wstring> bg;      // Background image files
-	this->obj['bg'] = bg;
+	this->obj[L"bg"] = bg;
 	
 	vector<wstring> bgm;     // Background music files
-	this->obj['bgm'] = bgm;
+	this->obj[L"bgm"] = bgm;
 	
 	vector<wstring> sfx;     // Sound effects files
-	this->obj['sfx'] = sfx;
+	this->obj[L"sfx"] = sfx;
 	
 	vector<wstring> sprites; // Sprite image files
-	this->obj['sprite'] = sprites;
+	this->obj[L"sprite"] = sprites;
 	
 	
 	// Load defaults
-	this->obj['bg'].push_back(DEFAULT_BG);
-	this->obj['bgm'].push_back(DEFAULT_BGM);
-	this->obj['sfx'].push_back(DEFAULT_SFX);
+	this->obj[L"bg"].push_back(DEFAULT_BG);
+	this->obj[L"bgm"].push_back(DEFAULT_BGM);
+	this->obj[L"sfx"].push_back(DEFAULT_SFX);
+	
+	
+	// Set control functions
+	this->mod[L"name"] = &setFrameName;
+	this->mod[L"bg"] = &addBGToFrame;
+	this->mod[L"bgm"] = &addBGMToFrame;
+	this->mod[L"sfx"] = &addSFXToFrame;
+	this->mod[L"sprite"] = &addSpriteToFrame;
 	
 	
 	//Set unicode input/output
@@ -86,14 +147,38 @@ int Frame::addKW(wstring kw, buildComp b)
 };
 
 // Add non-component data to the frame
-int Frame::setData(vector<wstring> params)
+void Frame::setData(vector<wstring> params)
 {
+	wstring p = L"";
 	for(int i = 0; i < params.size(); i++)
 	{
-		
+		if(params[i].first == F_PARAM)
+		{
+			if(this->mod.count(params[i].second) == 1)
+			{
+				p = params[i].second;
+			}
+			else
+			{
+				wcout << L"No such frame parameter";
+			}
+		}
+		else if(params[i].first == PARAM_VAL)
+		{
+			if(p.length() > 0)
+			{
+				this->mod[p](this, params[i].second);
+			}
+			else
+			{
+				wcout << L"This parameter value does not belong anywhere in this frame";
+			}
+		}
+		else
+		{
+			wcout << L"Incorrect delimiter for frame parameters";
+		}
 	}
-	
-	return 0;
 };
 
 // Set Frame name
@@ -127,7 +212,7 @@ int Frame::addBG(wstring bgfile)
 		}
 		
 		// Unsupported type error
-		this->err.push_back(BAD_BG_ERR);
+		this->err.push_back(BAD_BG_ERR + L" (" + bgfile + L")");
 		return BAD_BG;
 	}
 	else // Empty string error
@@ -154,7 +239,7 @@ int Frame::addBGM(wstring bgmfile)
 		}
 		
 		// Unsupported type error
-		this->err.push_back(BAD_BGM_ERR);
+		this->err.push_back(BAD_BGM_ERR + L" (" + bgmfile + L")");
 		return BAD_BGM;
 	}
 	else // Empty string error
@@ -181,7 +266,7 @@ int Frame::addSFX(wstring sfxfile)
 		}
 		
 		// Unsupported type error
-		this->err.push_back(BAD_SFX_ERR);
+		this->err.push_back(BAD_SFX_ERR + L" (" + sfxfile + L")");
 		return BAD_SFX;
 	}
 	else // Empty string error
@@ -205,7 +290,7 @@ int Frame::addSprite(wstring spritefile)
 		}
 		else
 		{
-			this->err.push_back(BAD_SPRITE_ERR);
+			this->err.push_back(BAD_SPRITE_ERR + L" (" + spritefile + L")");
 			return BAD_SPRITE; // Unsupported type error
 		}
 	}

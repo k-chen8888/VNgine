@@ -44,10 +44,10 @@
  * 	3. Perform update
  * 	4. Return NULL
  */
-typedef Component2* (*buildComp)(Frame*, Component2*, std::vector<std::wstring>);
+typedef Component2* (*buildComp)(Frame*, Component2*, std::vector<std::pair<int, std::wstring>>);
 
 
-/* Global variables */
+/* Global variables and special definitions */
 
 // Keyword map
 extern std::map<std::wstring, buildComp> keywords;
@@ -55,6 +55,18 @@ extern std::map<std::wstring, buildComp> keywords;
 // Delimiter vector
 extern wchar_t d[];
 extern std::vector<wchar_t> delim;
+// Definitions for the type of delimiter found at each position
+#define COMP_OPEN 1
+#define F_PARAM   3
+#define L2_PARAM  5
+#define L3_COMP   7
+#define L3_PARAM  11
+#define PARAM_VAL 13
+#define TXT_TOKEN 15
+
+// Ignored characters
+extern wchar_t i[];
+extern std::vector<wchar_t> ignore;
 
 
 /* Edit global variables */
@@ -64,6 +76,12 @@ void addToKeywords(std::wstring kw, buildComp);
 
 // Check if key exists in map
 void checkKeyword(std::wstring kw);
+
+// Removes escape characters
+std::wstring escape(std::wstring token, std::vector<unsigned int> e);
+
+// Strips ignored characters
+std::wstring strip(std::wstring token);
 
 //Set unicode input/output
 int setUnicode(bool in, bool out);

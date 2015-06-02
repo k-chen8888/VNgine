@@ -34,6 +34,17 @@ using namespace std;
 
 /* Control functions */
 
+// Add parameter to a frame
+Component2* addFrameParam(Frame* f, Component2* comp, vector<wstring> params)
+{
+	if(f != NULL)
+	{
+		f->setData(params);
+	}
+	
+	return NULL;
+}
+
 // Freeze a component
 Component2* freezeComp(Frame* f, Component2* comp, vector<wstring> params)
 {
@@ -73,7 +84,7 @@ Component2* endComp(Frame* f, Component2* comp, vector<wstring> params)
  ************************************************/
 
 /* Constructor */
-VNovel::VNovel(wstring src, vector<wchar_t> d)
+VNovel::VNovel(wstring src)
 {
 	this->source = src;
 	this->curr_frame = -1;
@@ -90,10 +101,10 @@ VNovel::VNovel(wstring src, vector<wchar_t> d)
 	}
 	
 	// Add keywords
-	this->addKW("Frame", NULL);             // Build a new frame
-	this->addKW("freeze", &freezeComp);     // Freeze current active component inside frame
-	this->addKW("unfreeze", &unFreezeComp); // Freeze current active component inside frame
-	this->addKW("endcomp", &endComp);       // End a component
+	this->addKW(L"f_param", &addFrameParam); // Add frame parameters
+	this->addKW(L"freeze", &freezeComp);     // Freeze current active component inside frame
+	this->addKW(L"unfreeze", &unFreezeComp); // Freeze current active component inside frame
+	this->addKW(L"endcomp", &endComp);       // End a component
 };
 
 /*******************************************
@@ -138,14 +149,11 @@ int VNovel::buildVN()
 		// PDA
 		PDA<wstring> script (line, this->delim);
 		
-		// Index of previous delimiter
-		unsigned int prev = 0;
-		
-		// Index of current delimiter
-		unsigned int curr = 0;
-		
 		// Map lookup keywords
-		vector<wstring> kwstack;
+		vector<pair<int, wstring>> kwlist;
+		
+		// Start position of current token
+		unsigned int start;
 		
 		// Locations of escape characters
 		vector<unsigned int> esc;
@@ -153,52 +161,48 @@ int VNovel::buildVN()
 		// Pull out and process the tokens
 		while(script.getPos() < line.length() && script.getErr() > -1)
 		{
-			string token = this->strip( script.readNext() );
+			string token = script.readNext();
+			int d = script.lastDelim();
 			
-			if(script.getErr() > -1)           // Continue if there are no errors
+			if(script.getErr() < -1)
 			{
-				if(curr != script.lastDelim()) // Update previous value only if the current opening delimiter has changed
-					prev = script.lastRemoved();
-				curr = script.lastDelim();
-				
-				// Validity check
-				if(script.getErr() < -1)
+				this->err.push_back( L"[Error:L" + to_wstring(lcount) + L"] Improper formatting\n" );
+			}
+			else // Found a token?
+			{
+				if(token.length() > 0)
 				{
-					this->err.push_back( L"[Error:L" + to_wstring(lcount) +"] Improper formatting\n" );
+					// Check if tokens can be added when a new opening delimiter is pushed
+					if(d > 0)
+					{
+						// Check if the token is meaningful (enclosed in delimiters)
+						if(script.lastRemoved() > 0)
+						{
+							// Create the final token and add it to the list
+							wstring finaltoken = escape(token, esc);
+							if(script.lastRemoved() != TXT_TOKEN)
+								finaltoken = strip(finaltoken);
+							
+							pair<int, wstring> t( script.lastRemoved(), finaltoken );
+							kwlist.push_back(t);
+							start = script.getPos();
+						}
+					}
+					
+					// Flush stack when the sequence ends
+					bool outofkw = script.stackDepth() == 0 && kwlist.size() > 0;
+					bool endofline = script.getPos() >= line.length();
+					if( outofkw || endofline )
+					{
+						this->buildNext(kwlist);
+						kwlist.clear();
+					}
 				}
 				else
 				{
-					// Work on actual tokens that are not comments	
-					if(token.length() > 0 && token != "comment")
-					{
-						// Add token to the stack
-						token = this->escape(token, esc);
-						kwstack.push_back(token);
-						
-						if(stack.getPos() == line.length() ||
-						   this->delim[curr] == '{' ||
-						   this->delim[curr] == '['
-						  )                      // Flush the stack on reaching the end of a line or beginning of a separate L2 delimiter
-						{
-							if(prev > 0)         // Closing delimiter was found
-							{
-								int err_code = this->buildNext(prev, kwstack);
-								
-								if(err_code < 0) // Report any errors
-									this->err.push_back( L"[Error:L" + to_wstring(lcount) +"] Invalid token \"" + token + "\" threw code " + to_wstring(err_code) + "\n" );
-							}
-						}
-					}
-					else
-					{
-						if(script.isEsc())       // Mark escape characters
-							esc.push_back(script.getPos());
-					}
+					if(script.isEsc()) // Mark escape characters
+						esc.push_back(script.getPos() - tstart);
 				}
-			}
-			else
-			{
-				this->err.push_back("[Error:L" + to_wstring(lcount) + "] Parser exception");
 			}
 		}
 		
@@ -211,162 +215,54 @@ int VNovel::buildVN()
 };
 
 // Builds the next VN component or update an existing one
-int VNovel::buildNext(int d, vector<wstring> params)
+int VNovel::buildNext(vector<pair<int, wstring>> params)
 {
-	// Special case for making a frame
-	if(params[0] == L"Frame")
-	{
-		Frame temp = new Frame(0);
-		this->curr_frame += 1;
-		
-		this->f[this->curr_frame].push_back(temp);
-		
-		return 0;
-	}
-	else
-	{
-		if(this->curr_frame == -1) // No Frame to store this component inside
-		{
-			this->err.push_back(NO_FRAME_ERR);
-			return NO_FRAME;
-		}
-	}
+	pair<int, wstring> data = params[0];
+	params.erase(params.begin() + 0);
 	
-	// Frame parameters
-	if(this->delim[d] == '~')
+	// Switch on the delimiter type
+	switch( data.first )
 	{
-		if(this->curr_frame == -1) // No Frame found
-		{
-			this->err.push_back(NO_FRAME_ERR);
-			return NO_FRAME;
-		}
+		// Frame or L2 Component
+		case COMP_OPEN:
+			if(data.second == L"Frame")
+			{
+				Frame temp = new Frame(0);
+				this->curr_frame += 1;
+				
+				this->f[this->curr_frame].push_back(temp);
+				
+				return 0;
+			}
+			else
+			{
+				keywords[ params[i].second ](this->f[this->curr_frame], NULL, params);
+			}
+			
+			break;
 		
-		// Add to Frame
-		this->f[this->curr_frame].setData(params);
-	}
-	
-	// General case
-	if( this->f[this->curr_frame]->getActiveComp() != NULL || keywords.count(params[0]) == 1 )
-	{
-		Component2* data = keywords[params[0]]( this->f[this->curr_frame], this->f[this->curr_frame].getActiveComp(), params );
-	}
-	else // Nowhere to store this new data
-	{
-		this->err.push_back(NO_COMP_ERR);
-		return NO_COMP;
+		// Frame parameter
+		case F_PARAM:
+			if(this->curr_frame == -1) // No Frame to store this component inside
+			{
+				this->err.push_back(NO_FRAME_ERR);
+				return NO_FRAME;
+			}
+			else
+			{
+				keywords[ L"f_param" ](this->f[this->curr_frame], NULL, params);
+			}
+			
+			break;
+		
+		// L2_PARAM, L3_COMP, L3_PARAM, PARAM_VAL and TXT_TOKEN handled in L2/L3 functions
+		
+		// Everything else
+		default:
+			break;
 	}
 	
 	return 0;
-};
-
-// Set ignored characters
-void VNovel::setIgnore(std::vector<wchar_t> i)
-{
-	this->ignore = i;
-};
-
-// Strips ignored characters
-wstring VNovel::strip(wstring token)
-{
-	wstring out;
-	
-	// Starting ignored characters
-	bool change = true;
-	bool ig = false;
-	int i = 0;
-	while(change && i < token.length())
-	{
-		ig = false;
-		for(int j = 0; j < this->ignore.size(); j++)
-		{
-			if(token.at(i) == this->ignore[j])
-			{
-				ig = true;
-				j = this->ignore.size();
-			}
-		}
-		
-		if(ig)
-			i += 1;
-		else
-			change = false;
-	}
-	
-	// Strip out the starting ignored characters
-	if(i < token.length())
-	{
-		if(i == 0)
-			out = token;
-		else
-			out = token.substr(i, token.length() - i);
-	}
-	else // Entire token to be ignored
-	{
-		return out;
-	}
-	
-	// Ending ignored characters
-	change = true;
-	int i = out.length() - 1;
-	while(change && i > -1)
-	{
-		ig = false;
-		for(int j = 0; j < this->ignore.size(); j++)
-		{
-			if(token.at(i) == this->ignore[j])
-			{
-				ig = true;
-				j = this->ignore.size();
-			}
-		}
-		
-		if(ig)
-			i -= 1;
-		else
-			change = false;
-	}
-	
-	// Strip out the ending ignored characters
-	if(i > 0)
-	{
-		if(i == out.length() - 1)
-			return out;
-		else
-			out = out.substr(0, i + 1);
-	}
-	
-	return out;
-};
-
-// Removes escape characters
-wstring VNovel::escape(wstring token, vector<unsigned int> e)
-{
-	wstring out;
-	int start = 0;
-	
-	if(e.size() > 0)
-	{
-		int j = 0;
-		for(int i = 0; i < token.length(); i++)
-		{
-			if(i == e[j])
-			{
-				wstring temp = token.substr(start, e[j] - start);
-				out = out + temp;
-				
-				// Update
-				j += 1;
-				if(j >= e.size())
-					i = token.length();
-			}
-		}
-	}
-	else
-	{
-		return token;
-	}
-	
-	return out;
 };
 
 /* Reporting */
