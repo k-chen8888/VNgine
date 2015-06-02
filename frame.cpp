@@ -10,11 +10,14 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+// Base files
+#include "vn_global.h"
+
+// L2 Component definition
+#include "component2.h"
+
 // Class header
 #include "vnovel.h"
-
-// Parser (pushdown automata)
-#include "pda_wstring.h"
 
 // Namespaces
 using namespace std;
@@ -35,10 +38,26 @@ Frame::Frame(unsigned int loc)
 	this->index = loc;
 	this->current = 0;
 	
+	
+	// Add frame object holders to map
+	vector<wstring> bg;      // Background image files
+	this->obj['bg'] = bg;
+	
+	vector<wstring> bgm;     // Background music files
+	this->obj['bgm'] = bgm;
+	
+	vector<wstring> sfx;     // Sound effects files
+	this->obj['sfx'] = sfx;
+	
+	vector<wstring> sprites; // Sprite image files
+	this->obj['sprite'] = sprites;
+	
+	
 	// Load defaults
-	this->bg.push_back(DEFAULT_BG);
-	this->bgm.push_back(DEFAULT_BGM);
-	this->sfx.push_back(DEFAULT_SFX);
+	this->obj['bg'].push_back(DEFAULT_BG);
+	this->obj['bgm'].push_back(DEFAULT_BGM);
+	this->obj['sfx'].push_back(DEFAULT_SFX);
+	
 	
 	//Set unicode input/output
 	setUnicode(true, true);
@@ -51,7 +70,7 @@ Frame::Frame(unsigned int loc)
 /* Build */
 
 // Add keywords to the map
-int addKW(std::wstring kw, buildComp b)
+int Frame::addKW(wstring kw, buildComp b)
 {
 	if(checkKeyword(kw) == 0)
 	{
@@ -59,15 +78,26 @@ int addKW(std::wstring kw, buildComp b)
 	}
 	else
 	{
-		this->err.push_back(DUP_KEY_ERR_1 << kw << DUP_KEY_ERR_2);
+		this->err.push_back(DUP_KEY_ERR_1 + kw + DUP_KEY_ERR_2);
 		return -1;
 	}
 	
 	return 0;
 };
 
+// Add non-component data to the frame
+int Frame::setData(vector<wstring> params)
+{
+	for(int i = 0; i < params.size(); i++)
+	{
+		
+	}
+	
+	return 0;
+};
+
 // Set Frame name
-int setName(std::wstring n)
+int Frame::setName(wstring n)
 {
 	if(n.length() > 0)
 		this->name = n;
@@ -91,7 +121,7 @@ int Frame::addBG(wstring bgfile)
 		for(int i = 0; i < supported.size(); i++){
 			if( bgfile.compare( bgfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 			{
-				this->bg.push_back(bgfile);
+				this->obj['bg'].push_back(bgfile);
 				return 0;
 			}
 		}
@@ -108,7 +138,7 @@ int Frame::addBG(wstring bgfile)
 };
 
 // Add a bgm file
-int Frame::addBGM(std::wstring bgmfile)
+int Frame::addBGM(wstring bgmfile)
 {
 	wstring types[] = {L".mp3", L".wav"};
 	vector<wstring> supported(types, types + 5);
@@ -118,7 +148,7 @@ int Frame::addBGM(std::wstring bgmfile)
 		for(int i = 0; i < supported.size(); i++){
 			if( bgmfile.compare( bgmfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 			{
-				this->bgm.push_back(bgmfile)
+				this->obj['bgm'].push_back(bgmfile);
 				return 0;
 			}
 		}
@@ -135,7 +165,7 @@ int Frame::addBGM(std::wstring bgmfile)
 };
 
 // Add a sound effect file
-int Frame::addSFX(std::wstring sfxfile)
+int Frame::addSFX(wstring sfxfile)
 {
 	wstring types[] = {L".mp3", L".wav"};
 	vector<wstring> supported(types, types + 5);
@@ -145,7 +175,7 @@ int Frame::addSFX(std::wstring sfxfile)
 		for(int i = 0; i < supported.size(); i++){
 			if( sfxfile.compare( sfxfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 			{
-				this->sfx.push_back(sfxfile);
+				this->obj['sfx'].push_back(sfxfile);
 				return 0;
 			}
 		}
@@ -162,15 +192,15 @@ int Frame::addSFX(std::wstring sfxfile)
 };
 
 // Add a sprite image file
-int Frame::addSprite(std::wstring spritefile)
+int Frame::addSprite(wstring spritefile)
 {
 	wstring supported(L".png");
 	
-	if(string.length() > 0)
+	if(spritefile.length() > 0)
 	{
 		if( spritefile.compare( spritefile.length() - 4, 4, supported ) == 0 ) // Found a supported type
 		{
-			this->sprites.push_back(spritefile);
+			this->obj['sprite'].push_back(spritefile);
 			return 0;
 		}
 		else
@@ -186,11 +216,72 @@ int Frame::addSprite(std::wstring spritefile)
 	}
 };
 
-// Add a component
-int Frame::addComponent(std::pair<void*, compPlayback> c)
+// Set a component as active for editing
+// Also sets frozen component on top of the stack to progress to this one
+int Frame::addActiveComponent(Component2* c)
 {
-	this->comp.push_back(c);
+	// Active component was never terminated
+	if(this->active != NULL)
+	{
+		this->err.push_back(HAS_ACTIVE_ERR);
+		return HAS_ACTIVE_ERR;
+		
+		this->active.setEnd(this->comp.size());
+		this->addComponent();
+	}
+	
+	// Check if freeze index needs to be set
+	if(this->frz.size() > 0)
+	{
+		Component2* frozen = frz.back();
+		frozen->setFreeze(c->getLoc());
+	}
+	
+	this->active = c;
 	return 0;
+};
+
+// Add currently active component to the list
+// Component is no longer being edited
+int Frame::addComponent()
+{
+	this->comp.push_back(this->active);
+	this->active = NULL;
+	return 0;
+};
+
+// Freeze a component (no longer being edited)
+int Frame::freeze(Component* c)
+{
+	this->frz.push_back(this->active);
+	this->active = NULL;
+	return 0;
+};
+
+// Unfreeze the last frozen component (the one on the top of the stack) (may be edited again)
+int Frame::unfreeze()
+{
+	// Active component was never terminated
+	if(this->active != NULL)
+	{
+		this->err.push_back(HAS_ACTIVE_ERR);
+		return HAS_ACTIVE_ERR;
+		
+		this->active.setEnd(this->comp.size());
+		this->addComponent();
+	}
+	
+	if(this->frz.size() > 0)
+	{
+		this->active = this->frz.back();
+		this->frz.pop_back();
+		return 0;
+	}
+	else
+	{
+		this->err.push_back(FRZ_EMPTY_ERR);
+		return FRZ_EMPTY;
+	}
 };
 
 /* Playback */
@@ -201,23 +292,16 @@ unsigned int Frame::play(bool gui)
 {
 	unsigned int out = 0;
 	
-	if(gui) // GUI display
+	// Playback must return the index of the next component to play
+	int next = -1; // -1 means keep playing this component
+
+	while(next == -1)
 	{
-		
+		next = this->comp[this->current]->play(gui);
 	}
-	else // Command line display
-	{
-		// Playback must return the index of the next component to play
-		int next = -1; // -1 means keep playing this component
-		
-		while(next == -1)
-		{
-			next = this->comp[this->current].second(this->comp[this->current].first, false, true);
-		}
-		
-		// Save the index of the next component
-		this->current = next;
-	}
+
+	// Save the index of the next component
+	this->current = next;
 	
 	if(this->comp.size() <= this->current)
 		out = this->current - this->comp.size(); // Calculate next Frame's index
@@ -242,20 +326,32 @@ pair<wstring, int> getID()
 	return out;
 };
 
+// Check if a component is active for editing
+bool Frame::isActiveComponent(Component2* c)
+{
+	return this->active == c;
+};
+
+// Retrieve active component (the one being edited)
+Component2* Frame::getActiveComp()
+{
+	return this->active;
+};
+
 // Retrieve a component at some index
-void* getComp(unsigned int index)
+void* Frame::getComp(unsigned int index)
 {
 	return this->comp[index];
 };
 
 // Get the number of components
-unsigned int getNumComp();
+unsigned int Frame::getNumComp();
 {
 	return this->comp.size();
 };
 
 // Get the index of the current component
-unsigned int getCurrent()
+unsigned int Frame::getCurrent()
 {
 	return this->current;
 };

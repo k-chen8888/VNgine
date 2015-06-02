@@ -18,27 +18,46 @@ using namespace std;
  ************************************************/
 
 /* Constructor */
-Text::Text(std::string c, int x, int y)
+Text::Text(int x, int y)
 {
-	this->content = c;
-	this->pos = make_pair(x, y);
+	this->freeze = -1;
+	this->end = -1;
+	
+	// Add default values to map
+	
+	// X position
+	if(x > -1)
+		this->mod[L"X"] = x;
+	else
+		this->mod[L"X"] = XPOS;
+	
+	// Y position
+	if(y > -1)
+		this->mod[L"Y"] = y;
+	else
+		this->mod[L"Y"] = YPOS;
+	
+	this->mod[L"color"] = COLOR;                 // Text color
+	this->mod[L"highlight"] = HIGHLIGHT_SPEAKER; // 1 puts a shadow over a non-speaking sprite
+	
+	// Indices of speaker and spectator in sprite list (in Frame)
+	// -1 implies no speaker/spectator
+	this->mod[L"speaker"] = -1;
+	this->mod[L"spectator"] = -1;
+	
+	// Indices of Frame background and bgm
+	// -1 uses Frame defaults
+	this->mod[L"framebg"] = -1;
+	this->mod[L"framebgm"] = -1;
+	
+	// Index of Frame SFX to use
+	// -1 uses no SFX
+	this->mod[L"framesfx"] = -1;
 };
 
 /*******************************************
  * Functions
  *******************************************/
-
-/* Playback */
-
-// Display content on screen
-
-/* Testing */
-
-// Display content on command line
-void Text::seeContent()
-{
-	cout << "@(" << this->pos.first << ", " << this->pos.second << ") " << this->content << "\n"; 
-};
 
 /* Destructor */
 Text::~Text()

@@ -5,6 +5,9 @@
 // Base files
 #include "vn_global.h"
 
+// L2 Component definition
+#include "component2.h"
+
 
 // Macros for error messages
 #define EMPTY_NAME       -2
@@ -30,6 +33,13 @@
 #define BAD_SPRITE       -10
 #define BAD_SPRITE_ERR   std::wstring(L"[Frame Error -10] Sprite file of unsupported type")
 
+#define HAS_ACTIVE       -11
+#define HAS_ACTIVE_ERR   std::wstring(L"[Frame Error -11] Tried to add an active frame, but there was already one in existance (compensating by auto-ending frame)")
+
+
+#define FRZ_EMPTY        -12
+#defint FRZ_EMPTY_ERR    std::wstring(L"[Frame Error -12] Unable to unfreeze component; no frozen components found")
+
 /* Control functions */
 
 
@@ -44,21 +54,21 @@
 class Frame
 {
 	private:
-		std::wstring name;                                // Identifying name
-		unsigned int index;                               // Identifying index
+		std::wstring name;                    // Identifying name
+		unsigned int index;                   // Identifying index
 		
-		std::vector<std::wstring> bg;                     // Background image files
-		std::vector<std::wstring> bgm;                    // Background music files
-		std::vector<std::wstring> sfx;                    // Sound effects files
-		std::vector<std::wstring> sprites;                // Sprite image files
+		// Frame objects
+		std::map<std::wstring, std::vector<std::wstring>> obj;
 		
-		std::pair<void*, compPlayback> active;            // Component being edited
-		std::vector<std::pair<void*, compPlayback>> comp; // Vector containing the component and its corresponding playback function
-		std::vector<std::pair<void*, compPlayback>> frz;  // Vector (stack) containing frozen components and their corresponding playback function
-		unsigned int current;                             // Index of current component being played
-		std::vector<unsigned int> next_frame;             // Possible next frames to jump to
+		// Editing variables
+		Component2* active;                   // Component being edited
+		std::vector<Component2*> frz;         // Vector (stack) containing frozen components and their corresponding playback function
 		
-		std::vector<std::wstring> err;                    // Error messages
+		// Playback variables
+		std::vector<Component2*> comp;        // Vector containing the component
+		unsigned int current;                 // Index of current component being played
+		
+		std::vector<std::wstring> err;        // Error messages
 		
 		// Private default constructor
 		Frame() { }
@@ -76,6 +86,9 @@ class Frame
 		// Add keywords to the map
 		int addKW(std::wstring kw, buildComp b);
 		
+		// Add non-component data to the frame
+		int setData(std::vector<std::wstring> params);
+		
 		// Set Frame name
 		int setName(std::wstring n);
 		
@@ -91,8 +104,18 @@ class Frame
 		// Add a sprite image file
 		int addSprite(std::wstring spritefile);
 		
-		// Add a component
-		int addComponent(std::pair<void*, compPlayback c);
+		// Set a component as active for editing
+		int addActiveComponent(Component2* c);
+		
+		// Add currently active component to the list
+		// Component is no longer being edited
+		int addComponent();
+		
+		// Freeze a component (no longer being edited)
+		int freeze(Component2* c);
+		
+		// Unfreeze the last frozen component (the one on the top of the stack) (may be edited again)
+		int unfreeze();
 		
 		/* Playback */
 		
@@ -108,8 +131,14 @@ class Frame
 		// Get name and index
 		std::pair<std::wstring, int> getID();
 		
+		// Check if a component is active for editing
+		bool isActiveComponent(Component2* c);
+		
+		// Retrieve active component (the one being edited)
+		Component2* getActiveComp();
+		
 		// Retrieve a component at some index
-		void* getComp(unsigned int index);
+		Component2* getComp(unsigned int index);
 		
 		// Get the number of components
 		unsigned int getNumComp();

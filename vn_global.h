@@ -2,6 +2,10 @@
 #define VN_GLOBAL_H
 
 
+// L2 Component definition
+#include "component2.h"
+
+
 // Macros for default files
 #define DEFAULT_BG  std::wstring(L"blackscreen.jpg")
 #define DEFAULT_BGM std::wstring(L"defaultsong.mp3")
@@ -30,7 +34,8 @@
  * 
  * Procedure (create): Happens when there are no other arguments and second argument is NULL
  * 	1. Create object
- *  2. Return object cast as void* and its playback function
+ *  2. Create a Component pointer and set it to address of new component
+ * 	3. Return Component pointer
  * 
  * Procedure (update):
  *  1. Cast the void* as the correct type
@@ -39,14 +44,7 @@
  * 	3. Perform update
  * 	4. Return NULL
  */
-typedef std::pair<void*, compPlayback> (*buildComp)(Frame, void*, std::vector<std::wstring>);
-
-/* typedef for generic function for playback of component
- * Used to define type of function in playback map
- * 
- * Also handles freezing a component
- */
-typedef int (*compPlayback)(void*, bool, bool);
+typedef Component2* (*buildComp)(Frame*, Component2*, std::vector<std::wstring>);
 
 
 /* Global variables */

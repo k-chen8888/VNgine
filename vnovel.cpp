@@ -10,17 +10,23 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-// Class header
-#include "vnovel.h"
-
 // Parser (pushdown automata)
 #include "pda_wstring.h"
+
+// Class header
+#include "vnovel.h"
 
 // Base files
 #include "vn_global.h"
 
+// Sub-Component definitions
+#include "component2.h"
+#include "component3.h"
+
 // VN Components
 #include "frame.h"
+#include "textbox.h"
+#include "text.h"
 
 // Namespaces
 using namespace std;
@@ -28,25 +34,34 @@ using namespace std;
 
 /* Control functions */
 
-// Freezing a component
-std::pair<void*, compPlayback> freezeComp(Frame f, void* comp, std::vector<std::wstring> params)
+// Freeze a component
+Component2* freezeComp(Frame* f, Component2* comp, vector<wstring> params)
 {
-	std::pair<void*, compPlayback> out;
-	
-	if(comp == NULL) // No component to freeze
+	if(comp != NULL) // Found a component to freeze
 	{
-		return out;
+		f->freeze(comp);
 	}
 	
-	return out;
+	return NULL;
 };
 
-// Unfreezing a component
-std::pair<void*, compPlayback> unFreezeComp(Frame f, void* comp, std::vector<std::wstring> params)
+// Unfreeze a component
+Component2* unFreezeComp(Frame* f, Component2* comp, vector<wstring> params)
 {
-	std::pair<void*, compPlayback> out;
+	int err = f->unfreeze();
 	
-	return out;
+	return NULL;
+};
+
+// End a component
+Component2* endComp(Frame* f, Component2* comp, vector<wstring> params)
+{
+	if(comp != NULL) // Found a component to end
+	{
+		comp->setEnd(f->getNumComp());
+	}
+	
+	return NULL;
 };
 
 /************************************************
@@ -75,8 +90,10 @@ VNovel::VNovel(wstring src, vector<wchar_t> d)
 	}
 	
 	// Add keywords
+	this->addKW("Frame", NULL);             // Build a new frame
 	this->addKW("freeze", &freezeComp);     // Freeze current active component inside frame
 	this->addKW("unfreeze", &unFreezeComp); // Freeze current active component inside frame
+	this->addKW("endcomp", &endComp);       // End a component
 };
 
 /*******************************************
@@ -128,7 +145,7 @@ int VNovel::buildVN()
 		unsigned int curr = 0;
 		
 		// Map lookup keywords
-		vector<string> kwstack;
+		vector<wstring> kwstack;
 		
 		// Locations of escape characters
 		vector<unsigned int> esc;
@@ -137,43 +154,51 @@ int VNovel::buildVN()
 		while(script.getPos() < line.length() && script.getErr() > -1)
 		{
 			string token = this->strip( script.readNext() );
-			if(curr != script.lastDelim()) // Update previous value only if the current opening delimiter has changed
-				prev = script.lastRemoved();
-			curr = script.lastDelim();
 			
-			// Validity check
-			if(script.getErr() < -1)
+			if(script.getErr() > -1)           // Continue if there are no errors
 			{
-				this->err.push_back( "[Error:L" + to_string(lcount) +"] Improper formatting\n" );
-			}
-			else
-			{
-				// Work on actual tokens that are not comments	
-				if(token.length() > 0 && token != "comment")
+				if(curr != script.lastDelim()) // Update previous value only if the current opening delimiter has changed
+					prev = script.lastRemoved();
+				curr = script.lastDelim();
+				
+				// Validity check
+				if(script.getErr() < -1)
 				{
-					// Add token to the stack
-					token = this->escape(token, esc);
-					kwstack.push_back(token);
-					
-					if(stack.getPos() == line.length() ||
-					   this->delim[curr] == '{' ||
-					   this->delim[curr] == '['
-					  )                      // Flush the stack on reaching the end of a line or beginning of a separate L2 delimiter
-					{	
-						if(prev > 0)         // Closing delimiter was found
-						{
-							int err_code = this->buildNext(prev, kwstack);
-							
-							if(err_code < 0) // Report any errors
-								this->err.push_back( "[Error:L" + to_string(lcount) +"] Invalid token \"" + token + "\" threw code " + to_string(err_code) + "\n" );
-						}
-					}
+					this->err.push_back( L"[Error:L" + to_wstring(lcount) +"] Improper formatting\n" );
 				}
 				else
 				{
-					if(script.isEsc())       // Mark escape characters
-						esc.push_back(script.getPos());
+					// Work on actual tokens that are not comments	
+					if(token.length() > 0 && token != "comment")
+					{
+						// Add token to the stack
+						token = this->escape(token, esc);
+						kwstack.push_back(token);
+						
+						if(stack.getPos() == line.length() ||
+						   this->delim[curr] == '{' ||
+						   this->delim[curr] == '['
+						  )                      // Flush the stack on reaching the end of a line or beginning of a separate L2 delimiter
+						{
+							if(prev > 0)         // Closing delimiter was found
+							{
+								int err_code = this->buildNext(prev, kwstack);
+								
+								if(err_code < 0) // Report any errors
+									this->err.push_back( L"[Error:L" + to_wstring(lcount) +"] Invalid token \"" + token + "\" threw code " + to_wstring(err_code) + "\n" );
+							}
+						}
+					}
+					else
+					{
+						if(script.isEsc())       // Mark escape characters
+							esc.push_back(script.getPos());
+					}
 				}
+			}
+			else
+			{
+				this->err.push_back("[Error:L" + to_wstring(lcount) + "] Parser exception");
 			}
 		}
 		
@@ -188,21 +213,10 @@ int VNovel::buildVN()
 // Builds the next VN component or update an existing one
 int VNovel::buildNext(int d, vector<wstring> params)
 {
-	vector<wstring> p;
-	if(this->delim[d] == '{')
-	{
-		for(int i = 1; i < params.size(); i++)
-			p.push_back(params[i]);
-	}
-	else
-	{
-		p = params;
-	}
-	
 	// Special case for making a frame
-	if(params[0] == "Frame")
+	if(params[0] == L"Frame")
 	{
-		Frame temp(0);
+		Frame temp = new Frame(0);
 		this->curr_frame += 1;
 		
 		this->f[this->curr_frame].push_back(temp);
@@ -213,42 +227,33 @@ int VNovel::buildNext(int d, vector<wstring> params)
 	{
 		if(this->curr_frame == -1) // No Frame to store this component inside
 		{
-			this->err.push_back("[Error -2] No Frame to store component");
-			return -2;
+			this->err.push_back(NO_FRAME_ERR);
+			return NO_FRAME;
 		}
 	}
 	
 	// Frame parameters
 	if(this->delim[d] == '~')
 	{
-		
-	}
-	else
-	{
 		if(this->curr_frame == -1) // No Frame found
 		{
-			this->err.push_back("[Error -3] No Frame to hold parameters");
-			return -3;
+			this->err.push_back(NO_FRAME_ERR);
+			return NO_FRAME;
 		}
+		
+		// Add to Frame
+		this->f[this->curr_frame].setData(params);
 	}
 	
 	// General case
-	if(p.size() == 0) // Make new component
+	if( this->f[this->curr_frame]->getActiveComp() != NULL || keywords.count(params[0]) == 1 )
 	{
-		keywords[params[0]](this->f[this->curr_frame], NULL, p);
+		Component2* data = keywords[params[0]]( this->f[this->curr_frame], this->f[this->curr_frame].getActiveComp(), params );
 	}
-	else              // Pass in existing component
+	else // Nowhere to store this new data
 	{
-		if( this->f[this->curr_frame].getNumComp() > 0)
-		{
-			pair<void*, buildComp> data = keywords[this->delim[d]][params[0]]( this->f[this->curr_frame], this->f[this->curr_frame].getComp( this->f[this->curr_frame].getNumComp() - 1 ), p );
-			this->f[this->curr_frame].addComponent(data);
-		}
-		else
-		{
-			this->err.push_back("[Error -4] No component to store data");
-			return -4;
-		}
+		this->err.push_back(NO_COMP_ERR);
+		return NO_COMP;
 	}
 	
 	return 0;
