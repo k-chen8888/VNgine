@@ -4,35 +4,19 @@
 
 // Base files
 #include "vn_global.h"
-
-// L2 Component definition
-#include "component2.h"
-
-
-// Macros for error messages
-#define NO_FRAME     -2
-#define NO_FRAME_ERR std::wstring(L"[Error -2] No Frame available to store data")
-
-#define NO_COMP      -3
-#define NO_COMP_ERR  std::wstring(L"[Error -3] No component available to store data")
+#include "container.h"
+#include "component.h"
+#include "vnobject.h"
 
 
-/* Control functions */
+// Parts of a Visual Novel
+#include "frame.h"
 
-// Add parameter to a frame
-void addFrameParam(Frame* f, std::vector<std::pair<int, std::wstring>> params);
 
-// End a frame, closing out all frozen and active components
-void endFrame(Frame* f, std::vector<std::pair<int, std::wstring>> params);
+// Error macros
+#define NO_CONT_ERR std::wstring(L"No container to store parameter values")
+#define NO_CONT     -2
 
-// Freeze a component
-void freezeComp(Frame* f, std::vector<std::pair<int, std::wstring>> params);
-
-// Unfreeze a component
-void unFreezeComp(Frame* f, std::vector<std::pair<int, std::wstring>> params);
-
-// End a component
-void endComp(Frame* f, std::vector<std::pair<int, std::wstring>> params);
 
 /************************************************
  * Visual Novel object
@@ -47,9 +31,8 @@ class VNovel
 		std::wstring source;           // Script file to build VN from
 		std::vector<wchar_t> ignore;   // Clean these out of the front and back of stored strings
 		
-		std::vector<Frame*> f;         // VN components, stored in Frame objects
-		int curr_frame;                // Index of current frame in vector (-1 means empty vector)
-		int current;                   // Index of current frame in vector (playback only)
+		std::vector<Container*> cont;  // VN components, stored in Container objects
+		unsigned int curr;             // Index of current Container in vector
 		
 		std::vector<std::wstring> err; // Error messages
 		
@@ -58,7 +41,22 @@ class VNovel
 	
 	public:
 		/* Constructor */
-		VNovel(std::wstring src);
+		VNovel(std::wstring src)
+		{
+			this->source = src;
+			this->curr = 0;
+			
+			//Set unicode input/output
+			int e = setUnicode(true, true);
+			if(e == SET_IN)
+			{
+				this->err.push_back(SET_IN_ERR);
+			}
+			if(e == SET_OUT)
+			{
+				this->err.push_back(SET_OUT_ERR);
+			}
+		};
 		
 		/*******************************************
 		 * Functions
@@ -66,27 +64,191 @@ class VNovel
 		
 		/* Build a Visual Novel */
 		
-		// Add keywords to the map
-		int addKW(std::wstring kw, buildComp b);
-		
 		// Builds VN from script file
-		int buildVN();
+		int buildVN()
+		{
+			wifstream ifile;
+			try
+			{
+				ifile.open(this->source);
+			}
+			catch(int e)
+			{
+				return e; // Failure
+			}
+			
+			wstring line;
+			unsigned int lcount;
+			while( getline(ifile, line) )
+			{
+				// PDA
+				PDA<wstring> script (line, this->delim);
+				
+				// Map lookup keywords
+				vector<pair<int, wstring>> kwlist;
+				
+				// Start position of current token
+				unsigned int start;
+				
+				// Locations of escape characters
+				vector<unsigned int> esc;
+				
+				// Pull out and process the tokens
+				while(script.getPos() < line.length() && script.getErr() > -1)
+				{
+					string token = script.readNext();
+					int d = script.lastDelim();
+					
+					if(script.getErr() < -1)
+					{
+						this->err.push_back( L"[Error:L" + to_wstring(lcount) + L"] Improper formatting\n" );
+					}
+					else // Found a token?
+					{
+						if(token.length() > 0)
+						{
+							// Check if tokens can be added when a new opening delimiter is pushed
+							if(d > 0)
+							{
+								// Check if the token is meaningful (enclosed in delimiters)
+								if(script.lastRemoved() > 0)
+								{
+									// Create the final token and add it to the list
+									wstring finaltoken = escape(token, esc);
+									if(script.lastRemoved() != TXT_TOKEN)
+										finaltoken = strip(finaltoken);
+									
+									kwlist.push_back( make_pair( script.lastRemoved(), finaltoken ) );
+									start = script.getPos();
+								}
+							}
+							
+							// Flush stack when the sequence ends
+							bool outofkw = script.stackDepth() == 0 && kwlist.size() > 0;
+							bool endofline = script.getPos() >= line.length();
+							if( outofkw || endofline )
+							{
+								// Switch on the delimiter type
+								switch( kwlist[0].first )
+								{
+									// Container
+									case CONT_OPEN:
+										keywords[ kwlist[0].second ](this, 1, kwlist);
+										break;
+									
+									// Container parameter
+									case CONT_PARAM:
+										if(this->curr == this->cont.size()) // No Container to store this component inside
+										{
+											this->err.push_back(NO_CONT_ERR);
+											return NO_CONT;
+										}
+										else
+										{
+											keywords[ L"f_param" ](this, 0, kwlist);
+										}
+										
+										break;
+									
+									// Everything else
+									default:
+										break;
+								}
+								
+								kwlist.clear();
+							}
+						}
+						else
+						{
+							if(script.isEsc()) // Mark escape characters
+								esc.push_back(script.getPos() - tstart);
+						}
+					}
+				}
+				
+				lcount += 1;
+			}
+			
+			ifile.close();
+			
+			return 0;
+		};
 		
-		// Builds the next VN component or update an existing one
-		int buildNext(std::vector<pair<int, std::wstring>> params);
+		// Add Container to the list
+		void addCont(Container* c)
+		{
+			this->cont.push_back(c);
+		};
+		
+		// Deactivate Container for editing
+		void deactivateCont()
+		{
+			if(this->curr == this->cont.size() - 1)
+			{
+				this->curr += 1;
+			}
+			else
+			{
+				this->curr = this->cont.size();
+			}
+		};
 		
 		/* Playback */
 		
 		// Plays the visual novel
-		int playNovel(bool gui);
+		int playNovel(bool gui)
+		{
+			
+			return 0;
+		};
 		
 		/* Reporting */
 		
+		// Number of containers
+		unsigned int numCont()
+		{
+			return this->cont.size();
+		}
+		
+		// Index of currently active Container
+		unsigned int getCurr()
+		{
+			return this->curr;
+		};
+		
+		// Currently active Container
+		Container* getActiveCont()
+		{
+			if(this->curr < this->cont.size())
+				return this->cont[this->curr];
+			else
+				return NULL;
+		}
+		
+		// Container at given index
+		Container* getContAt(unsigned int index)
+		{
+			if(index < this->cont.size())
+				return this->cont[index];
+			else
+				return NULL;
+		};
+		
 		// Display all error messages
-		int reportErrors();
+		int reportErrors()
+		{
+			for(int i = 0; i < this->err.length(); i++)
+				wcout << this->err[i] << "\n";
+			
+			return 0;
+		};
 		
 		/* Destructor */
-		~VNovel();
+		~VNovel()
+		{
+			for(int i = 0; i < this->cont.size(); i++)
+				delete this->cont[i];
+		};
 };
 
 

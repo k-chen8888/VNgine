@@ -23,7 +23,7 @@ using namespace std;
 map<wstring, buildComp> keywords;
 
 // Delimiter vector
-wchar_t d[] = {L'\\', L'{', L'}', L'~', L'~', L'<', L'>', L'[', L']', L'(', L')', L'\'', L'\'', L'"', L'"'};
+wchar_t d[] = {L'\\', L'{', L'}', L'~', L'~', L'[', L']', L':', L':', L'(', L')', L'#', L'#', L'\'', L'\'', L'"', L'"'};
 vector<wchar_t> delim (d, d + sizeof(d)/sizeof(wchar_t));
 
 // Ignored characters
@@ -36,13 +36,14 @@ std::vector<wchar_t> ignore(i, i + sizeof(i)/sizeof(wchar_t));
 // Add elements to keyword map
 void addToKeywords(std::wstring kw, buildComp b)
 {
-	keywords[kw] = buildComp;
-};
-
-// Check if key exists in map
-void checkKeyword(std::wstring kw)
-{
-	return keywords.count(kw);
+	if(keywords.count(kw) == 1)
+	{
+		wcout << DUP_KEY_ERR_1 << kw << DUP_KEY_ERR_2 << L"\n";
+	}
+	else
+	{
+		keywords[kw] = buildComp;
+	}
 };
 
 // Removes escape characters

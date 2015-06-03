@@ -1,13 +1,12 @@
-#ifndef VNOVEL_H
-#define VNOVEL_H
+#ifndef FRAME_H
+#define FRAME_H
 
 
 // Base files
 #include "vn_global.h"
-
-// L2 Component definition
-#include "component2.h"
-
+#include "container.h"
+#include "component.h"
+#include "vnobject.h"
 
 // Macros for error messages
 #define EMPTY_NAME       -2
@@ -45,9 +44,12 @@ void (*addObj)(Frame*, std::wstring);
 
 
 /* Control functions */
-		
-// Set Frame name
-void setName(Frame* f, std::wstring n);
+
+// Create a frame
+unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+
+// Add parameter to a frame
+unsigned int addFrameParam(VNovel* vn, unsigned int start, vector<wstring> params);
 
 // Add a background image
 void addBG(Frame* f, std::wstring bgfile);
@@ -61,113 +63,287 @@ void addSFX(Frame* f, std::wstring sfxfile);
 // Add a sprite image file
 void addSprite(Frame* f, std::wstring spritefile);
 
+// End a frame, closing out all frozen and active components
+unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params);
+
 
 /************************************************
  * Visual Novel Frame
- * 
- * Contents (all vectors):
- * 	Type of component (found in an external map)
- * 	Identifier for component
- * 	Display content
+ * Container-type VN component (holds objects of type Component)
  ************************************************/
-class Frame
+template <>
+class Frame : public Container<Component>
 {
 	private:
-		std::wstring name;                        // Identifying name
-		unsigned int index;                       // Identifying index
-		
-		// Frame objects and a way to access them
-		std::map<std::wstring, std::wstring> obj; // Frame objects
-		std::map<std::wstring, addObj> mod;       // Add frame objects using referenced function
-		
-		// Editing variables
-		Component2* active;                       // Component being edited
-		std::vector<Component2*> frz;             // Vector (stack) containing frozen components and their corresponding playback function
-		
-		// Playback variables
-		std::vector<Component2*> comp;            // Vector containing the component
-		unsigned int current;                     // Index of current component being played
-		
-		std::vector<std::wstring> err;            // Error messages
+		// Map that defines all possible frame parameters and provides a way to add and store them
+		std::map<std::wstring, std::pair<std::vector<std::wstring>, addObj>> mod;
 		
 		// Private default constructor
 		Frame() { }
 	
 	public:
 		/* Constructor */
-		Frame(unsigned int loc);
+		Frame(std::wstring n, int i)
+		{
+			//Set unicode input/output
+			setUnicode(true, true);
+			
+			// Set identifiers
+			this->name = n;
+			this->index = i;
+			
+			// Add frame object holders to map
+			this->mod[L"bg"].second = &addBG;         // Background image files
+			this->mod[L"bgm"].second = &addBGM;       // Background music files
+			this->mod[L"sfx"].second = &addSFX;       // Sound effects files
+			this->mod[L"sprite"].second = &addSprite; // Sprite image files
+			
+			// Playback control
+			this->current = 0;
+			this->ending = 0;
+		};
 		
 		/*******************************************
 		 * Functions
 		 *******************************************/
 		
-		/* Build */
-		
-		// Add keywords to the map
-		int addKW(std::wstring kw, buildComp b);
+		/* Build and edit */
 		
 		// Add non-component data to the frame
-		void setData(std::vector<std::wstring> params);
-		
-		// Set Frame name
-		int setName(std::wstring n);
+		unsigned int Frame::setData(unsigned int start, vector<wstring> params)
+		{
+			wstring p = L"";
+			
+			// Go through parameters and fill in data
+			for(int i = start; i < params.size(); i++)
+			{
+				if(params[i].first == F_PARAM)
+				{
+					if(this->mod.count(params[i].second) == 1)
+					{
+						p = params[i].second;
+					}
+					else
+					{
+						wcout << L"No such frame parameter";
+						return i;
+					}
+				}
+				else if(params[i].first == PARAM_VAL)
+				{
+					if(p.length() > 0)
+					{
+						this->mod[p](this, params[i].second);
+					}
+					else
+					{
+						wcout << L"This parameter value does not belong anywhere in this frame";
+						return i;
+					}
+				}
+				else
+				{
+					wcout << L"Incorrect delimiter for frame parameters";
+					return i;
+				}
+			}
+			
+			return params.size() - 1;
+		};
 		
 		// Add a background image
-		int addBG(std::wstring bgfile);
+		int addBG(std::wstring bgfile)
+		{
+			std::wstring types[] = {L".jpg", L".png", L".gif"};
+			std::vector<std::wstring> supported(types, types + 3);
+			
+			if(bgfile.length() > 0)
+			{
+				for(int i = 0; i < supported.size(); i++){
+					if( bgfile.compare( bgfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
+					{
+						this->obj['bg'].first.push_back(bgfile);
+						return 0;
+					}
+				}
+				
+				// Unsupported type error
+				this->err.push_back(BAD_BG_ERR + L" (" + bgfile + L")");
+				return BAD_BG;
+			}
+			else // Empty string error
+			{
+				this->err.push_back(EMPTY_BG_ERR);
+				return EMPTY_BG;
+			}
+		};
 		
 		// Add a bgm file
-		int addBGM(std::wstring bgmfile);
+		int addBGM(std::wstring bgmfile)
+		{
+			std::wstring types[] = {L".mp3", L".wav"};
+			std::vector<std::wstring> supported(types, types + 2);
+			
+			if(bgmfile.length() > 0)
+			{
+				for(int i = 0; i < supported.size(); i++){
+					if( bgmfile.compare( bgmfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
+					{
+						this->obj['bgm'].first.push_back(bgmfile);
+						return 0;
+					}
+				}
+				
+				// Unsupported type error
+				this->err.push_back(BAD_BGM_ERR + L" (" + bgmfile + L")");
+				return BAD_BGM;
+			}
+			else // Empty string error
+			{
+				this->err.push_back(EMPTY_BGM_ERR);
+				return EMPTY_BGM;
+			}
+		};
 		
 		// Add a sound effect file
 		int addSFX(std::wstring sfxfile);
+		{
+			std::wstring types[] = {L".mp3", L".wav"};
+			std::vector<std::wstring> supported(types, types + 2);
+			
+			if(sfxfile.length() > 0)
+			{
+				for(int i = 0; i < supported.size(); i++){
+					if( sfxfile.compare( sfxfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
+					{
+						this->obj['sfx'].first.push_back(sfxfile);
+						return 0;
+					}
+				}
+				
+				// Unsupported type error
+				this->err.push_back(BAD_SFX_ERR + L" (" + sfxfile + L")");
+				return BAD_SFX;
+			}
+			else // Empty string error
+			{
+				this->err.push_back(EMPTY_SFX_ERR);
+				return EMPTY_SFX;
+			}
+		};
 		
 		// Add a sprite image file
-		int addSprite(std::wstring spritefile);
+		int addSprite(std::wstring spritefile)
+		{
+			wstring supported(L".png");
+			
+			if(spritefile.length() > 0)
+			{
+				if( spritefile.compare( spritefile.length() - 4, 4, supported ) == 0 ) // Found a supported type
+				{
+					this->obj['sprite'].first.push_back(spritefile);
+					return 0;
+				}
+				else
+				{
+					this->err.push_back(BAD_SPRITE_ERR + L" (" + spritefile + L")");
+					return BAD_SPRITE; // Unsupported type error
+				}
+			}
+			else // Empty string error
+			{
+				this->err.push_back(EMPTY_SPRITE_ERR);
+				return EMPTY_SPRITE;
+			}
+		};
 		
 		// Set a component as active for editing
-		int addActiveComponent(Component2* c);
+		void addActiveComp(Component* c)
+		{
+			if(c != NULL)
+			{
+				this->contents.push_back(c);
+			}
+		};
 		
-		// Add currently active component to the list
-		// Component is no longer being edited
-		int addComponent();
-		
-		// Freeze active component (no longer being edited)
-		int freeze();
-		
-		// Unfreeze the last frozen component (the one on the top of the stack) (may be edited again)
-		int unfreeze();
+		// Deactivate a component for editing
+		void deactivateComp()
+		{
+			if(this->current == this->contents.size() - 1)
+			{
+				this->current += 1;
+			}
+			else
+			{
+				this->current = this->contents.size();
+			}
+		}
 		
 		/* Playback */
 		
 		// Play through components (to GUI if gui == true, otherwise, to a command line)
 		// Output the index of the next frame to jump to
-		int play(bool gui);
-		
-		// Draws the background using the images in the order specified
-		int drawBG(std::vector<int> order);
+		int play(bool gui)
+		{
+			// Reset traversal
+			this->current = 0;
+			this->ending = 0;
+			
+		};
 		
 		/* Reporting */
 		
 		// Get name and index
-		std::pair<std::wstring, int> getID();
+		std::pair<std::wstring, int> getID()
+		{
+			std::pair<std::wstring, int> out(this->name, this->index);
+			return out;
+		};
+		
+		// Get index of active component
+		unsigned int getCurrent()
+		{
+			return this->current;
+		}
 		
 		// Check if a component is active for editing
-		bool isActiveComponent(Component2* c);
+		bool isActive(Component* c)
+		{
+			if(this->current < this->contents.size())
+				return this->active == this->contents[this->current];
+			else
+				return false;
+		};
 		
-		// Retrieve active component (the one being edited)
-		Component2* getActiveComp();
+		// Retrieve active component (the one being played/edited)
+		Component* getActiveComp()
+		{
+			if(this->current < this->contents.size())
+				return this->contents[this->current];
+			else
+				return NULL;
+		};
 		
 		// Retrieve a component at some index
-		Component2* getComp(unsigned int index);
+		Component* getComp(unsigned int index)
+		{
+			if(index < this->contents.size())
+				return this->contents[index];
+			else
+				return NULL;
+		};
 		
 		// Get the number of components
-		unsigned int getNumComp();
-		
-		// Get the index of the current component
-		unsigned int getCurrent();
+		unsigned int getNumComp()
+		{
+			return this->contents.size();
+		};
 		
 		/* Destructor */
-		~Frame();
+		~Frame()
+		{
+			// Nothing to do here
+		};
 };
 
 

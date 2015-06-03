@@ -28,23 +28,13 @@
  * Used to define type of function in keyword map
  * 
  * Arguments:
- * 	1. The current frame that the component belongs to
- * 	2. The object that is being edited
- * 	3. Other arguments (properties followed by saved data token)
+ * 	1. Visual Novel object
+ * 	2. Place in parameter list to start looking
+ * 	3. Other arguments (properties followed by saved data token; parameter list)
  * 
- * Procedure (create): Happens when there are no other arguments and second argument is NULL
- * 	1. Create object
- *  2. Create a Component pointer and set it to address of new component
- * 	3. Update active component
- * 
- * Procedure (update):
- *  1. Cast the void* as the correct type
- * 	2. Look for property in component's property map
- *  	a. No property -> text token
- * 	3. Perform update
- * 	4. Update active component only if component is no longer active
+ * Output: Position where function stopped reading arguments (1 before the next argument to be read)
  */
-typedef void (*buildComp)(Frame*, std::vector<std::pair<int, std::wstring>>);
+typedef unsigned int (*buildComp)(VNovel*, unsigned int, std::vector<std::pair<int, std::wstring>>);
 
 
 /* Global variables and special definitions */
@@ -56,13 +46,14 @@ extern std::map<std::wstring, buildComp> keywords;
 extern wchar_t d[];
 extern std::vector<wchar_t> delim;
 // Definitions for the type of delimiter found at each position
-#define COMP_OPEN 1
-#define F_PARAM   3
-#define L2_PARAM  5
-#define L3_COMP   7
-#define L3_PARAM  11
-#define PARAM_VAL 13
-#define TXT_TOKEN 15
+#define CONT_OPEN  1
+#define CONT_PARAM 3
+#define COMP_OPEN  5
+#define COMP_PARAM 7
+#define OBJ_OPEN   9
+#define OBJ_PARAM  11
+#define PARAM_VAL  13
+#define TXT_TOKEN  15
 
 // Ignored characters
 extern wchar_t i[];
@@ -73,9 +64,6 @@ extern std::vector<wchar_t> ignore;
 
 // Add elements to keyword map
 void addToKeywords(std::wstring kw, buildComp);
-
-// Check if key exists in map
-void checkKeyword(std::wstring kw);
 
 // Removes escape characters
 std::wstring escape(std::wstring token, std::vector<unsigned int> e);
