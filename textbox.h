@@ -9,6 +9,15 @@
 #include "vnobject.h"
 
 
+/* Control functions */
+
+// Create a TextBox
+unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+
+// End a TextBox, closing out all frozen and active VNObjects
+unsigned int endTextBox(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params);
+
+
 /************************************************
  * Visual Novel TextBox
  * Component that contains and displays Text objects
@@ -121,6 +130,12 @@ class TextBox : public Component
 		{
 			this->current = 0;
 			this->ending = 0;
+		};
+		
+		/* Destructor */
+		~TextBox()
+		{
+			// Nothing to do here
 		};
 };
 

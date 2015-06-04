@@ -28,7 +28,7 @@ using namespace std;
 
 /* Control functions */
 
-// Create a frame
+// Create a Frame
 unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
 {
 	unsigned int out = start;
@@ -122,7 +122,7 @@ void addSpriteToFrame(Container* f, std::wstring spritefile)
 		wcout << L"'" << spritefile << L"' threw error code " << err;
 };
 
-// End a frame, closing out all frozen and active components
+// End a Frame, closing out all frozen and active Components
 unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
 {
 	Container* curr_frame = vn->getActiveCont();

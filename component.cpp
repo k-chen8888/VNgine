@@ -16,9 +16,6 @@
 #include "component.h"
 #include "vnobject.h"
 
-// Class header
-#include "frame.h"
-
 // Visual Novel
 #include "vnovel.h"
 
@@ -28,12 +25,13 @@ using namespace std;
 
 /* Control functions */
 
-// Add parameters to a Container
-unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+// Add parameters to a Component
+unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
 {
-	Container* c = vn->getActiveCont();
+	Container* cont = vn->getActiveCont();
+	Component* c = cont->getActiveComp();
 	
-	if(c == NULL) // No Container to store parameters inside
+	if(c == NULL) // No Component to store parameters inside
 	{
 		return params.size();
 	}
@@ -43,14 +41,14 @@ unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair
 	{
 		switch(params[i].first)
 		{
-			// Container parameter
-			case CONT_PARAM:
+			// Component parameter
+			case COMP_PARAM:
 				i = c->setData(start, params);
 				break;
 			
-			// Value for Container parameter, but cannot be handled
+			// Value for Component parameter, but cannot be handled
 			case PARAM_VAL:
-				wcout << L"Cannot handle Container parameter value '" << params[i].second << L"' without knowing where it belongs\n";
+				wcout << L"Cannot handle Component parameter value '" << params[i].second << L"' without knowing where it belongs\n";
 				break;
 			
 			// Insignificant symbol here
@@ -65,4 +63,4 @@ unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair
 
 
 // Add helper keywords
-addToContainers(L"cont_param", &setContParams);
+addToComponents(L"comp_param", &setCompParams);

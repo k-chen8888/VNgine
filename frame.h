@@ -45,7 +45,7 @@ void (*addObj)(Frame*, std::wstring);
 
 /* Control functions */
 
-// Create a frame
+// Create a Frame
 unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
 
 // Add a background image
@@ -59,6 +59,9 @@ void addSFX(Frame* f, std::wstring sfxfile);
 
 // Add a sprite image file
 void addSprite(Frame* f, std::wstring spritefile);
+
+// End a Frame, closing out all frozen and active Components
+unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params);
 
 
 /************************************************
@@ -306,60 +309,11 @@ class Frame : public Container<Component>
 			
 		};
 		
-		
 		// Reset playback
 		void resetPlay()
 		{
 			this->current = 0;
 			this->ending = 0;
-		};
-		
-		/* Reporting */
-		
-		// Get name and index
-		std::pair<std::wstring, int> getID()
-		{
-			std::pair<std::wstring, int> out(this->name, this->index);
-			return out;
-		};
-		
-		// Get index of active component
-		unsigned int getCurrent()
-		{
-			return this->current;
-		}
-		
-		// Check if a component is active for editing
-		bool isActive(Component* c)
-		{
-			if(this->current < this->contents.size())
-				return this->active == this->contents[this->current];
-			else
-				return false;
-		};
-		
-		// Retrieve active component (the one being played/edited)
-		Component* getActiveComp()
-		{
-			if(this->current < this->contents.size())
-				return this->contents[this->current];
-			else
-				return NULL;
-		};
-		
-		// Retrieve a component at some index
-		Component* getComp(unsigned int index)
-		{
-			if(index < this->contents.size())
-				return this->contents[index];
-			else
-				return NULL;
-		};
-		
-		// Get the number of components
-		unsigned int getNumComp()
-		{
-			return this->contents.size();
 		};
 		
 		/* Destructor */

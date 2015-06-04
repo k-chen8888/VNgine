@@ -66,9 +66,6 @@ class Container
 			}
 		};
 		
-		// Add content
-		virtual unsigned int setContent(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
-		
 		/* Playback */
 		
 		// Play the Container
@@ -77,6 +74,54 @@ class Container
 		
 		// Reset playback
 		virtual void resetPlay() = 0;
+		
+		/* Reporting */
+		
+		// Get name and index
+		std::pair<std::wstring, int> getID()
+		{
+			std::pair<std::wstring, int> out(this->name, this->index);
+			return out;
+		};
+		
+		// Get index of active Component
+		unsigned int getCurrent()
+		{
+			return this->current;
+		}
+		
+		// Check if there is a Component active for editing
+		bool hasActive()
+		{
+			if(this->current < this->contents.size())
+				return this->active == this->contents[this->current];
+			else
+				return false;
+		};
+		
+		// Retrieve active Component (the one being played/edited)
+		Component* getActiveComp()
+		{
+			if(this->current < this->contents.size())
+				return this->contents[this->current];
+			else
+				return NULL;
+		};
+		
+		// Retrieve a Component at some index
+		Component* getComp(unsigned int index)
+		{
+			if(index < this->contents.size())
+				return this->contents[index];
+			else
+				return NULL;
+		};
+		
+		// Get the number of Components
+		unsigned int getNumComp()
+		{
+			return this->contents.size();
+		};
 };
 
 

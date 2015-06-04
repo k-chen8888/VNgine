@@ -52,6 +52,26 @@ class VNObject
 		// Play the VNObject
 		// Return index to the next Component (or -1 to continue within the same Component)
 		virtual int play(bool gui) = 0;
+		
+		/* Reporting */
+		
+		// Is there a freeze after this VNObject?
+		bool isFreeze()
+		{
+			return this->freeze > -1;
+		};
+		
+		// Does the component end after this VNObject?
+		bool isEnd()
+		{
+			return this->end > -1;
+		};
+		
+		/* Destructor */
+		~VNObject()
+		{
+			// Nothing to do here
+		};
 };
 
 

@@ -5,7 +5,7 @@
 /* Control functions */
 
 // Add parameters to a Component
-unsigned int setConpParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
 
 
 /* Abstract class for a visual novel component
@@ -53,6 +53,47 @@ class Component
 		
 		// Reset playback
 		virtual void resetPlay() = 0;
+		
+		/* Reporting */
+		
+		// Get index of active VNObject
+		unsigned int getCurrent()
+		{
+			return this->current;
+		}
+		
+		// Check if there is a VNObject active for editing
+		bool hasActive()
+		{
+			if(this->current < this->contents.size())
+				return this->active == this->contents[this->current];
+			else
+				return false;
+		};
+		
+		// Retrieve active VNObject (the one being played/edited)
+		VNObject* getActiveObj()
+		{
+			if(this->current < this->contents.size())
+				return this->contents[this->current];
+			else
+				return NULL;
+		};
+		
+		// Retrieve a VNObject at some index
+		VNObject* getObj(unsigned int index)
+		{
+			if(index < this->contents.size())
+				return this->contents[index];
+			else
+				return NULL;
+		};
+		
+		// Get the number of Components
+		unsigned int getNumObj()
+		{
+			return this->contents.size();
+		};
 };
 
 
