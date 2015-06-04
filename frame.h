@@ -48,9 +48,6 @@ void (*addObj)(Frame*, std::wstring);
 // Create a frame
 unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
 
-// Add parameter to a frame
-unsigned int addFrameParam(VNovel* vn, unsigned int start, vector<wstring> params);
-
 // Add a background image
 void addBG(Frame* f, std::wstring bgfile);
 
@@ -62,9 +59,6 @@ void addSFX(Frame* f, std::wstring sfxfile);
 
 // Add a sprite image file
 void addSprite(Frame* f, std::wstring spritefile);
-
-// End a frame, closing out all frozen and active components
-unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params);
 
 
 /************************************************
@@ -109,8 +103,8 @@ class Frame : public Container<Component>
 		
 		/* Build and edit */
 		
-		// Add non-component data to the frame
-		unsigned int Frame::setData(unsigned int start, vector<wstring> params)
+		// Fill in parameters
+		unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params)
 		{
 			wstring p = L"";
 			
@@ -137,13 +131,13 @@ class Frame : public Container<Component>
 					}
 					else
 					{
-						wcout << L"This parameter value does not belong anywhere in this frame";
+						wcout << L"No specified location for given parameter value in this frame";
 						return i;
 					}
 				}
 				else
 				{
-					wcout << L"Incorrect delimiter for frame parameters";
+					wcout << L"[Warning] Incorrect delimiter for frame parameters";
 					return i;
 				}
 			}

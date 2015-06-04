@@ -60,7 +60,7 @@ extern wchar_t i[];
 extern std::vector<wchar_t> ignore;
 
 
-/* Edit global variables */
+/* Editing tools and helper functions */
 
 // Add elements to keyword map
 void addToKeywords(std::wstring kw, buildComp);
@@ -70,6 +70,9 @@ std::wstring escape(std::wstring token, std::vector<unsigned int> e);
 
 // Strips ignored characters
 std::wstring strip(std::wstring token);
+
+// String to integer
+int toInt(wstring s);
 
 //Set unicode input/output
 int setUnicode(bool in, bool out);

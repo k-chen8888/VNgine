@@ -36,6 +36,18 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	Container* c;
 	Container* last_frame;
 	
+	// Create a new frame
+	if(params[out].first == L'\'')
+	{
+		f = new Frame(params[out].second, vn->getCurr());
+		out += 1;
+	}
+	else
+	{
+		f = new Frame(L"", vn->getCurr());
+	}
+	c = f;
+	
 	// Check if previous frame was closed out properly
 	if(vn->getCurr() < vn->numCont())
 	{
@@ -45,22 +57,10 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	}
 	last_frame = vn->getContAt(vn->getCurr() - 1);
 	
-	if(params[out].first == L'\'')
-	{
-		f = new Frame(params[out].second, vn->getCurr());
-		out += 1;
-	}
-	else
-	{
-		f = new Frame("", vn->getCurr());
-	}
-	
-	c = f;
-	
-	// Set ending of last_frame
+	// Set ending of last_frame to reference this frame
 	if(last_frame != NULL)
 	{
-		last_frame->setNext(last_frame->getCurrent(), NULL);
+		last_frame->setNext(0, c);
 	}
 	
 	// Set any other parameters if they exist
@@ -70,12 +70,12 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 		{
 			// Frame parameter
 			case F_PARAM:
-				i = addFrameParam(c, loc, out, params);
+				i = c->setData(start, params);
 				break;
 			
 			// Value for frame parameter, but cannot be handled
 			case PARAM_VAL:
-				wcout << "Cannot handle frame parameter value '" << params[i].second << "'\n";
+				wcout << L"Cannot handle frame parameter value '" << params[i].second << L"' without knowing what it is\n";
 				break;
 			
 			// Insignificant symbol here
@@ -88,15 +88,6 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	// Add Container to list and end
 	vn->addCont(c);
 	return out;
-}
-
-// Add parameter to a frame
-unsigned int addFrameParam(VNovel* vn, unsigned int start, vector<wstring> params)
-{
-	if(f != NULL)
-		return f->setData(start, params);
-	else
-		return start;
 };
 
 // Add a background image
@@ -104,7 +95,7 @@ void addBGToFrame(Container* f, std::wstring bgfile)
 {
 	int err = f->addBG(bgfile);
 	if(err < 0)
-		wcout << "'" << bgfile << "' threw error code " << err;
+		wcout << L"'" << bgfile << L"' threw error code " << err;
 };
 
 // Add a bgm file
@@ -112,7 +103,7 @@ void addBGMToFrame(Container* f, std::wstring bgmfile)
 {
 	int err = f->addBGM(bgmfile);
 	if(err < 0)
-		wcout << "'" << bgmfile << "' threw error code " << err;
+		wcout << L"'" << bgmfile << L"' threw error code " << err;
 };
 
 // Add a sound effect file
@@ -120,7 +111,7 @@ void addSFXToFrame(Container* f, std::wstring sfxfile)
 {
 	int err = f->addSFX(sfxfile);
 	if(err < 0)
-		wcout << "'" << sfxfile << "' threw error code " << err;
+		wcout << L"'" << sfxfile << L"' threw error code " << err;
 };
 
 // Add a sprite image file
@@ -128,7 +119,7 @@ void addSpriteToFrame(Container* f, std::wstring spritefile)
 {
 	int err = f->addSprite(spritefile);
 	if(err < 0)
-		wcout << "'" << spritefile << "' threw error code " << err;
+		wcout << L"'" << spritefile << L"' threw error code " << err;
 };
 
 // End a frame, closing out all frozen and active components
@@ -139,6 +130,7 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>>
 	// End the last existing frame for good
 	if(curr_frame != NULL)
 	{
+		// End of frame is the current position (which should be the number of components at the very end)
 		curr_frame->setNext(curr_frame->getCurrent(), NULL);
 		vn->deactivateCont();
 	}
@@ -149,6 +141,5 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>>
 
 
 // Add keywords to map
-addToKeywords("frame", &makeFrame);
-addToKeywords("f_param", &addFrameParam);
-addToKeywords("endframe", &endFrame);
+addToKeywords(L"frame", &makeFrame);
+addToKeywords(L"endframe", &endFrame);

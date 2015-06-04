@@ -128,33 +128,41 @@ class VNovel
 							bool endofline = script.getPos() >= line.length();
 							if( outofkw || endofline )
 							{
-								// Switch on the delimiter type
-								switch( kwlist[0].first )
+								unsigned int s = 0;
+								while(s < kwlist.size())
 								{
-									// Container
-									case CONT_OPEN:
-										keywords[ kwlist[0].second ](this, 1, kwlist);
-										break;
-									
-									// Container parameter
-									case CONT_PARAM:
-										if(this->curr == this->cont.size()) // No Container to store this component inside
-										{
-											this->err.push_back(NO_CONT_ERR);
-											return NO_CONT;
-										}
-										else
-										{
-											keywords[ L"f_param" ](this, 0, kwlist);
-										}
+									// Switch on the delimiter type
+									switch( kwlist[0].first )
+									{
+										// Container
+										case CONT_OPEN:
+											s = keywords[ kwlist[0].second ](this, 1, kwlist);
+											break;
 										
-										break;
+										// Container parameter
+										case CONT_PARAM:
+											// Attempt to add Container parameters
+											s = keywords[ L"cont_param" ](this, 0, kwlist);
+											
+											// Returns the length of params on error
+											if(s == params.size())
+											{
+												this->err.push_back(NO_CONT_ERR);
+												return NO_CONT;
+											}
+											
+											break;
+										
+										// Everything else
+										default:
+											s = keywords[ L"non-cont" ](this, 0, kwlist);
+											break;
+									}
 									
-									// Everything else
-									default:
-										break;
+									s += 1;
 								}
 								
+								// No more keywords
 								kwlist.clear();
 							}
 						}

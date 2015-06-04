@@ -31,7 +31,7 @@ wchar_t i[] = {L' ', L'\t', L'\n', L'\v'};
 std::vector<wchar_t> ignore(i, i + sizeof(i)/sizeof(wchar_t));
 
 
-/* Edit common properties and global variables */
+/* Editing tools and helper functions */
 
 // Add elements to keyword map
 void addToKeywords(std::wstring kw, buildComp b)
@@ -73,44 +73,44 @@ wstring escape(std::wstring token, std::vector<unsigned int> e)
 					switch(token.at(start))
 					{
 						// Escape character itself
-						case '\\':
+						case L'\\':
 							out = out + L"\\";
 							start += 1;
 							j += 1;
 							break;
 						
 						// Backspace
-						case 'b':
+						case L'b':
 							out = out + L"\b";
 							start += 1;
 							break;
 						
 						// Form feed
-						case 'f':
+						case L'f':
 							out = out + L"\f";
 							start += 1;
 							break;
 						
 						// Line feed
-						case 'n':
+						case L'n':
 							out = out + L"\n";
 							start += 1;
 							break;
 						
 						// Carriage return
-						case 'r':
+						case L'r':
 							out = out + L"\r";
 							start += 1;
 							break;
 						
 						// Horizontal tab
-						case 't':
+						case L't':
 							out = out + L"\t";
 							start += 1;
 							break;
 						
 						// Vertical tab
-						case 'v':
+						case L'v':
 							out = out + L"\v";
 							start += 1;
 							break;
@@ -210,6 +210,68 @@ wstring strip(wstring token)
 	}
 	
 	return out;
+};
+
+// String to integer
+int toInt(wstring s)
+{
+	int val = 0;
+	int t_val = 0;
+	int pos = 0;
+	while(pos < v.length())
+	{
+		switch(v.at(pos))
+		{
+			case L'0':
+				t_val = 0;
+				break;
+			
+			case L'1':
+				t_val = 1;
+				break;
+			
+			case L'2':
+				t_val = 2;
+				break;
+			
+			case L'3':
+				t_val = 3;
+				break;
+			
+			case L'4':
+				t_val = 4;
+				break;
+			
+			case L'5':
+				t_val = 5;
+				break;
+			
+			case L'6':
+				t_val = 6;
+				break;
+			
+			case L'7':
+				t_val = 7;
+				break;
+			
+			case L'8':
+				t_val = 8;
+				break;
+			
+			case L'9':
+				t_val = 9;
+				break;
+			
+			// Not an integer
+			default:
+				return -1;
+		}
+		
+		val = val * 10 + t_val;
+		pos += 1;
+	}
+	
+	return val;
 };
 
 //Set unicode input/output
