@@ -2,6 +2,12 @@
 #define COMPONENT_H
 
 
+/* Control functions */
+
+// Add parameters to a Component
+unsigned int setConpParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+
+
 /* Abstract class for a visual novel component
  */
 class Component
@@ -39,15 +45,15 @@ class Component
 				next.push_back( std::make_pair(stop_pt, next) );
 		};
 		
-		// Add content
-		virtual unsigned int setContent(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
-		
 		/* Playback */
 		
 		// Play the Component
 		// Return index to the next Component
 		virtual int play(bool gui) = 0;
-}
+		
+		// Reset playback
+		virtual void resetPlay() = 0;
+};
 
 
 #endif

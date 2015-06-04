@@ -13,15 +13,23 @@
 
 
 // Macros for error messages
-#define SET_IN        -1
-#define SET_IN_ERR    std::string("[Error -1] Cannot set input mode to unicode")
+#define SET_IN         -1
+#define SET_IN_ERR     std::string("[Error -1] Cannot set input mode to unicode")
 
-#define SET_OUT       -2
-#define SET_OUT_ERR   std::string("[Error -2] Cannot set output mode to unicode")
+#define SET_OUT        -2
+#define SET_OUT_ERR    std::string("[Error -2] Cannot set output mode to unicode")
 
-#define DUP_KEY       -3
-#define DUP_KEY_ERR_1 std::wstring(L"[Error -3] Keyword '")
-#define DUP_KEY_ERR_2 std::wstring(L"' already exists in the map")
+#define DUP_CONT       -3
+#define DUP_CONT_ERR_1 std::wstring(L"[Error -3] Container keyword '")
+#define DUP_CONT_ERR_2 std::wstring(L"' already exists in the map")
+
+#define DUP_COMP       -3
+#define DUP_COMP_ERR_1 std::wstring(L"[Error -3] Component keyword '")
+#define DUP_COMP_ERR_2 std::wstring(L"' already exists in the map")
+
+#define DUP_OBJ        -3
+#define DUP_OBJ_ERR_1  std::wstring(L"[Error -3] VNObject keyword '")
+#define DUP_OBJ_ERR_2  std::wstring(L"' already exists in the map")
 
 
 /* typedef for generic function used to create/modify any component
@@ -39,8 +47,10 @@ typedef unsigned int (*buildComp)(VNovel*, unsigned int, std::vector<std::pair<i
 
 /* Global variables and special definitions */
 
-// Keyword map
-extern std::map<std::wstring, buildComp> keywords;
+// Keyword maps
+extern std::map<std::wstring, buildComp> containers;
+extern std::map<std::wstring, buildComp> components;
+extern std::map<std::wstring, buildComp> vnobjects;
 
 // Delimiter vector
 extern wchar_t d[];
@@ -62,8 +72,10 @@ extern std::vector<wchar_t> ignore;
 
 /* Editing tools and helper functions */
 
-// Add elements to keyword map
-void addToKeywords(std::wstring kw, buildComp);
+// Add elements to keyword maps
+void addToContainers(std::wstring kw, buildComp);
+void addToComponents(std::wstring kw, buildComp);
+void addToVNObjects(std::wstring kw, buildComp);
 
 // Removes escape characters
 std::wstring escape(std::wstring token, std::vector<unsigned int> e);

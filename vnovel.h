@@ -14,8 +14,20 @@
 
 
 // Error macros
-#define NO_CONT_ERR std::wstring(L"No container to store parameter values")
-#define NO_CONT     -2
+#define NO_CONT_ERR     std::wstring(L"No Container to store parameter values")
+#define NO_CONT         -2
+
+#define NO_COMP_ERR     std::wstring(L"No Component to store parameter values")
+#define NO_COMP         -3
+
+#define NO_OBJ_ERR      std::wstring(L"No VNObject to store parameter values")
+#define NO_OBJ          -4
+
+#define LOOSE_PARAM_ERR std::wstring(L"Parameter doesn't belong anywhere")
+#define LOOSE_PARAM     -5
+
+#define LOOSE_TXT_ERR   std::wstring(L"Text token doesn't belong anywhere")
+#define LOOSE_TXT       -6
 
 
 /************************************************
@@ -136,13 +148,13 @@ class VNovel
 									{
 										// Container
 										case CONT_OPEN:
-											s = keywords[ kwlist[0].second ](this, 1, kwlist);
+											s = containers[ kwlist[0].second ](this, 1, kwlist);
 											break;
 										
 										// Container parameter
 										case CONT_PARAM:
 											// Attempt to add Container parameters
-											s = keywords[ L"cont_param" ](this, 0, kwlist);
+											s = containers[ L"cont_param" ](this, 0, kwlist);
 											
 											// Returns the length of params on error
 											if(s == params.size())
@@ -153,9 +165,56 @@ class VNovel
 											
 											break;
 										
+										// Component
+										case COMP_OPEN:
+											s = components[ kwlist[0].second ](this, 1, kwlist);
+											break;
+										
+										// Component parameter
+										case COMP_PARAM:
+											// Attempt to add Component parameters
+											s = components[ L"comp_param" ](this, 0, kwlist);
+											
+											// Returns the length of params on error
+											if(s == params.size())
+											{
+												this->err.push_back(NO_COMP_ERR);
+												return NO_COMP;
+											}
+											
+											break;
+										
+										// VNObject
+										case OBJ_OPEN:
+											s = vnobjects[ kwlist[0].second ](this, 1, kwlist);
+											break;
+										
+										// VNObject parameter
+										case OBJ_PARAM:
+											// Attempt to add Component parameters
+											s = vnobjects[ L"obj_param" ](this, 0, kwlist);
+											
+											// Returns the length of params on error
+											if(s == params.size())
+											{
+												this->err.push_back(NO_OBJ_ERR);
+												return NO_OBJ;
+											}
+											
+											break;
+										
+										// Parameter value (misplaced)
+										case PARAM_VAL:
+											this->err.push_back(LOOSE_PARAM_ERR);
+											return LOOSE_PARAM;
+										
+										// Text token (misplaced)
+										case TXT_TOKEN:
+											this->err.push_back(LOOSE_TXT_ERR);
+											return TXT_PARAM;
+										
 										// Everything else
 										default:
-											s = keywords[ L"non-cont" ](this, 0, kwlist);
 											break;
 									}
 									

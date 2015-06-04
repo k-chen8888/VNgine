@@ -131,7 +131,7 @@ class Frame : public Container<Component>
 					}
 					else
 					{
-						wcout << L"No specified location for given parameter value in this frame";
+						wcout << L"No specified location for given parameter value in this Frame Container";
 						return i;
 					}
 				}
@@ -251,6 +251,30 @@ class Frame : public Container<Component>
 			}
 		};
 		
+		// Add content
+		unsigned int setContent(unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+		{
+			for(int i = start; i < params.size(); i++)
+			{
+				switch(params[i].first)
+				{
+					// Start of a component
+					case COMP_OPEN:
+						break;
+					
+					// Component parameter
+					case COMP_PARAM:
+						break;
+					
+					// All other delimiters
+					default:
+						return i;
+				}
+			}
+			
+			return params.size() -1;
+		}
+		
 		// Set a component as active for editing
 		void addActiveComp(Component* c)
 		{
@@ -279,10 +303,15 @@ class Frame : public Container<Component>
 		// Output the index of the next frame to jump to
 		int play(bool gui)
 		{
-			// Reset traversal
+			
+		};
+		
+		
+		// Reset playback
+		void resetPlay()
+		{
 			this->current = 0;
 			this->ending = 0;
-			
 		};
 		
 		/* Reporting */

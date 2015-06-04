@@ -64,20 +64,5 @@ unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair
 };
 
 
-// Add contents to a container
-unsigned int nonContData(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
-{
-	Container* c = vn->getActiveCont();
-	
-	if(c == NULL) // No Container to store parameters inside
-	{
-		return -1;
-	}
-	
-	return c->setContent(start, params);
-};
-
-
 // Add helper keywords
 addToKeywords(L"cont_param", &setContParams);
-addToKeywords(L"non-cont", &nonContData);

@@ -14,9 +14,6 @@
 // Add parameters to a Container
 unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
 
-// Add contents to a container
-unsigned int nonContData(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
-
 
 /* Abstract class for a visual novel component container
  */
@@ -77,7 +74,10 @@ class Container
 		// Play the Container
 		// Return the next Container to play
 		virtual int play(bool gui) = 0;
-}
+		
+		// Reset playback
+		virtual void resetPlay() = 0;
+};
 
 
 #endif

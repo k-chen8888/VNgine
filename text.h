@@ -10,24 +10,26 @@
 
 
 /************************************************
- * Visual Novel TextBox
- * Component that contains and displays Text objects
+ * Visual Novel Text
+ * VNObject that contains and displays wstring text
  ************************************************/
-class TextBox : public Component
+class TextBox : public VNObject
 {
 	private:
+		std::wstring content;
+		
 		// Private default constructor
 		TextBox() { }
 	
 	public:
 		/* Constructor */
-		TextBox(int loc)
+		Text(std::wstring c)
 		{
 			//Set unicode input/output
 			setUnicode(true, true);
 			
 			// Set identifiers
-			this->index = loc;
+			this->content = c;
 			
 			// Add modifiers to map
 			
@@ -37,8 +39,28 @@ class TextBox : public Component
 			this->mod[L"b"] = 255;
 			this->mod[L"alpha"] = 100;
 			
-			// Height
-			this->mod[L"height"] = 200;
+			// 1 puts a shadow over a non-speaking sprite
+			this->mod[L"highlight"] = 1;
+			
+			// 1 pauses and waits for the user to continue
+			this->mod[L"p"] = 0
+			
+			// Font
+			this->mod[L"size"] = 12;
+			
+			// Indices of speaker and spectator in sprite list (in Frame)
+			// -1 implies no speaker/spectator
+			this->mod[L"speaker"] = -1;
+			this->mod[L"spectator"] = -1;
+			
+			// Indices of Frame background and bgm
+			// -1 uses Frame defaults
+			this->mod[L"framebg"] = -1;
+			this->mod[L"framebgm"] = -1;
+			
+			// Index of Frame SFX to use
+			// -1 uses no SFX
+			this->mod[L"framesfx"] = -1;
 		};
 		
 		/*******************************************
@@ -54,8 +76,8 @@ class TextBox : public Component
 			{
 				switch(params[i].first)
 				{
-					// Component parameter delimiter
-					case COMP_PARAM:
+					// VNObject parameter delimiter
+					case OBJ_PARAM:
 						if(params[i + 1].first == PARAM_VAL)
 						{
 							// Attempt to generate integer
@@ -80,14 +102,21 @@ class TextBox : public Component
 						}
 						else
 						{
-							// Report no value for parameter error
+							if(params[i].second.compare(L"p") == 0)
+							{
+								this->mod[L"p"] = 1;
+							}
+							else
+							{
+								// Report no value for parameter error
+							}
 						}
 						
 						break;
 					
 					// Floating parameter value delimiter (skip)
 					case COMP_PARAM:
-						wcout << L"No specified location for given parameter value in this TextBox Component";
+						wcout << L"No specified location for given parameter value in this Text object";
 						break;
 					
 					// All other delimiters
@@ -95,32 +124,40 @@ class TextBox : public Component
 						return i;
 				}
 			}
-			
-			return params.size() - 1;
 		};
 		
 		/* Playback */
 		
-		// Play the Component
-		// Return index to the next Component
+		// Play the VNObject
+		// Return index to the next Component (or -1 to continue within the same Component)
 		int play(bool gui)
 		{
-			int out = -1;
-			
-			// Play current component until output changes
-			while(out == -1)
+			if(gui)
 			{
-				out = this->contents[this->current]->play(gui);
+				
+			}
+			else
+			{
+				wcout << content;
+				
+				// Wait to continue if needed
+				if(this->mod[L"p"] == 1)
+				{
+					wcout << "\nPress enter to continue...\n";
+					wcin.ignore( numeric_limits <streamsize> ::max(), '\n' );
+				}
 			}
 			
-			return out;
-		};
-		
-		// Reset playback
-		void resetPlay()
-		{
-			this->current = 0;
-			this->ending = 0;
+			// Freeze component?
+			if(freeze > -1)
+				return freeze;
+			
+			// End component?
+			if(end > -1)
+				return end;
+			
+			// Continue within component
+			return -1;
 		};
 };
 

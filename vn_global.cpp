@@ -19,8 +19,10 @@ using namespace std;
 
 /* Global variables */
 
-// Keyword map
-map<wstring, buildComp> keywords;
+// Keyword maps
+std::map<std::wstring, buildComp> containers;
+std::map<std::wstring, buildComp> components;
+std::map<std::wstring, buildComp> vnobjects;
 
 // Delimiter vector
 wchar_t d[] = {L'\\', L'{', L'}', L'~', L'~', L'[', L']', L':', L':', L'(', L')', L'#', L'#', L'\'', L'\'', L'"', L'"'};
@@ -33,16 +35,46 @@ std::vector<wchar_t> ignore(i, i + sizeof(i)/sizeof(wchar_t));
 
 /* Editing tools and helper functions */
 
-// Add elements to keyword map
-void addToKeywords(std::wstring kw, buildComp b)
+// Add elements to keyword maps
+int addToContainers(std::wstring kw, buildComp b)
 {
-	if(keywords.count(kw) == 1)
+	if(containers.count(kw) == 1)
 	{
-		wcout << DUP_KEY_ERR_1 << kw << DUP_KEY_ERR_2 << L"\n";
+		wcout << DUP_CONT_ERR_1 << kw << DUP_CONT_ERR_2 << L"\n";
+		return DUP_CONT;
 	}
 	else
 	{
-		keywords[kw] = buildComp;
+		containers[kw] = buildComp;
+		return 0;
+	}
+};
+
+void addToComponents(std::wstring kw, buildComp b)
+{
+	if(containers.count(kw) == 1)
+	{
+		wcout << DUP_COMP_ERR_1 << kw << DUP_COMP_ERR_2 << L"\n";
+		return DUP_COMP;
+	}
+	else
+	{
+		components[kw] = buildComp;
+		return 0;
+	}
+};
+
+void addToVNObjects(std::wstring kw, buildComp b)
+{
+	if(containers.count(kw) == 1)
+	{
+		wcout << DUP_OBJ_ERR_1 << kw << DUP_OBJ_ERR_2 << L"\n";
+		return DUP_OBJ;
+	}
+	else
+	{
+		vnobjects[kw] = buildComp;
+		return 0;
 	}
 };
 

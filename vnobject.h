@@ -2,6 +2,12 @@
 #define VNOBJECT_H
 
 
+/* Control functions */
+
+// Add parameters to a VNObject
+unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+
+
 /* Abstract class for a visual novel object inside a component
  */
 class VNObject
@@ -46,7 +52,7 @@ class VNObject
 		// Play the VNObject
 		// Return index to the next Component (or -1 to continue within the same Component)
 		virtual int play(bool gui) = 0;
-}
+};
 
 
 #endif
