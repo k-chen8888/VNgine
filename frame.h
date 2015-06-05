@@ -8,9 +8,13 @@
 #include "component.h"
 #include "vnobject.h"
 
+
 // Macros for error messages
-#define EMPTY_NAME       -2
-#define EMPTY_NAME_ERR   std::wstring(L"[Frame Error -2] No name given")
+// Errors happen when the object is sure that behavior is wrong
+#define BAD_PARAM        -1
+#define BAD_PARAM_ERR    std::wstring(L"[Frame Error -1] Parameter name not found")
+#define FLOATING_VAL     -2
+#define FLOATING_VAL_ERR std::wstring(L"[Frame Error -2] Tried to add value without giving a parameter name")
 
 #define EMPTY_BG         -3
 #define EMPTY_BG_ERR     std::wstring(L"[Frame Error -3] No background image file given")
@@ -32,11 +36,17 @@
 #define BAD_SPRITE       -10
 #define BAD_SPRITE_ERR   std::wstring(L"[Frame Error -10] Sprite file of unsupported type")
 
-#define HAS_ACTIVE       -11
-#define HAS_ACTIVE_ERR   std::wstring(L"[Frame Error -11] Tried to add an active frame, but there was already one in existance (compensating by auto-ending frame)")
-
+#define CANNOT_FRZ       -11
+#define CANNOT_FRZ_ERR   std::wstring(L"[Frame Error -11] No content to freeze")
 #define FRZ_EMPTY        -12
-#defint FRZ_EMPTY_ERR    std::wstring(L"[Frame Error -12] Unable to unfreeze component; no frozen components found")
+#define FRZ_EMPTY_ERR    std::wstring(L"[Frame Error -12] Unable to unfreeze component; no frozen content found")
+
+
+// Macros for warnings
+// Warnings happen when the object is unsure if erratic behavior is intended
+#define BAD_DELIM_WARN   std::wstring(L"[Warning] Incorrect delimiter for frame parameters")
+#define END_PLAY_WARN    std::wstring(L"[Warning] Reached end of playback")
+#define HAS_ACTIVE_WARN  std::wstring(L"[Warning] Tried to add an active frame, but there was already one in existance (compensating by auto-ending frame)")
 
 
 // typedef for control functions
@@ -114,7 +124,7 @@ class Frame : public Container<Component>
 			// Go through parameters and fill in data
 			for(int i = start; i < params.size(); i++)
 			{
-				if(params[i].first == F_PARAM)
+				if(params[i].first == CONT_PARAM)
 				{
 					if(this->mod.count(params[i].second) == 1)
 					{
@@ -122,7 +132,7 @@ class Frame : public Container<Component>
 					}
 					else
 					{
-						wcout << L"No such frame parameter";
+						this->err.push_back(BAD_PARAM_ERR);
 						return i;
 					}
 				}
@@ -134,13 +144,13 @@ class Frame : public Container<Component>
 					}
 					else
 					{
-						wcout << L"No specified location for given parameter value in this Frame Container";
+						this->err.push_back(FLOATING_VAL_ERR);
 						return i;
 					}
 				}
 				else
 				{
-					wcout << L"[Warning] Incorrect delimiter for frame parameters";
+					this->err.push_back(BAD_DELIM_WARN);
 					return i;
 				}
 			}
@@ -254,36 +264,19 @@ class Frame : public Container<Component>
 			}
 		};
 		
-		// Add content
-		unsigned int setContent(unsigned int start, std::vector<std::pair<int, std::wstring>> params)
-		{
-			for(int i = start; i < params.size(); i++)
-			{
-				switch(params[i].first)
-				{
-					// Start of a component
-					case COMP_OPEN:
-						break;
-					
-					// Component parameter
-					case COMP_PARAM:
-						break;
-					
-					// All other delimiters
-					default:
-						return i;
-				}
-			}
-			
-			return params.size() -1;
-		};
-		
 		// Freeze content and return how many things are frozen
 		unsigned int freeze()
 		{
-			this->frz.push_back(this->contents.back());
-			this->contents.pop_back();
-			this->deactivateComp();
+			if(this->current < this->contents.size())
+			{
+				this->frz.push_back(this->contents[this->current]);
+				this->contents.pop_back();
+				this->deactivateComp();
+			}
+			else
+			{
+				this->err.push_back(CANNOT_FRZ_ERR);
+			}
 			
 			return this->frz.size();
 		};
@@ -296,6 +289,10 @@ class Frame : public Container<Component>
 				Component* frozen = this->frz.back();
 				this->current = frozen->getID();
 				this->frozen.pop_back();
+			}
+			else
+			{
+				this->err.push_back(FRZ_EMPTY_ERR);
 			}
 			
 			return this->frz.size();
@@ -314,6 +311,10 @@ class Frame : public Container<Component>
 			
 			if(this->ending < this->next.size())
 			{
+				// Intentionally terminated playback?
+				if(this->ending >= this->next.size() - 1)
+					this->err.push_back(END_PLAY_WARN);
+				
 				this->ending += 1;
 				return this->next[this->ending].first;
 			}

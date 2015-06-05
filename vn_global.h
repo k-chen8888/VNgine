@@ -2,10 +2,6 @@
 #define VN_GLOBAL_H
 
 
-// L2 Component definition
-#include "component2.h"
-
-
 // Macros for default files
 #define DEFAULT_BG  std::wstring(L"blackscreen.jpg")
 #define DEFAULT_BGM std::wstring(L"defaultsong.mp3")
@@ -42,15 +38,15 @@
  * 
  * Output: Position where function stopped reading arguments (1 before the next argument to be read)
  */
-typedef unsigned int (*buildComp)(VNovel*, unsigned int, std::vector<std::pair<int, std::wstring>>);
+typedef unsigned int (*build)(VNovel*, unsigned int, std::vector<std::pair<int, std::wstring>>);
 
 
 /* Global variables and special definitions */
 
 // Keyword maps
-extern std::map<std::wstring, buildComp> containers;
-extern std::map<std::wstring, buildComp> components;
-extern std::map<std::wstring, buildComp> vnobjects;
+extern std::map<std::wstring, build> containers;
+extern std::map<std::wstring, build> components;
+extern std::map<std::wstring, build> vnobjects;
 
 // Delimiter vector
 extern wchar_t d[];
@@ -73,9 +69,9 @@ extern std::vector<wchar_t> ignore;
 /* Editing tools and helper functions */
 
 // Add elements to keyword maps
-void addToContainers(std::wstring kw, buildComp);
-void addToComponents(std::wstring kw, buildComp);
-void addToVNObjects(std::wstring kw, buildComp);
+void addToContainers(std::wstring kw, build b);
+void addToComponents(std::wstring kw, build b);
+void addToVNObjects(std::wstring kw, build b);
 
 // Removes escape characters
 std::wstring escape(std::wstring token, std::vector<unsigned int> e);

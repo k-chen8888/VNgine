@@ -17,7 +17,7 @@
 #include "vnobject.h"
 
 // Class header
-#include "frame.h"
+#include "container.h"
 
 // Visual Novel
 #include "vnovel.h"

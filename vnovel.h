@@ -9,8 +9,14 @@
 #include "vnobject.h"
 
 
-// Parts of a Visual Novel
+// Parts of the Visual Novel
+#include "vnovel.h"
+
 #include "frame.h"
+
+#include "textbox.h"
+
+#include "text.h"
 
 
 // Error macros
