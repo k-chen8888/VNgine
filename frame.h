@@ -307,7 +307,16 @@ class Frame : public Container<Component>
 		// Output the index of the next frame to jump to
 		int play(bool gui)
 		{
+			while(this->current < this->contents.size()
+			{
+				this->current = this->contents[this->current]->play(gui);
+			}
 			
+			if(this->ending < this->next.size())
+			{
+				this->ending += 1;
+				return this->next[this->ending].first;
+			}
 		};
 		
 		// Reset playback
@@ -315,12 +324,20 @@ class Frame : public Container<Component>
 		{
 			this->current = 0;
 			this->ending = 0;
+			
+			for(int i = 0; i < this->contents.size(); i++)
+			{
+				this->contents[i]->resetPlay();
+			}
 		};
 		
 		/* Destructor */
 		~Frame()
 		{
-			// Nothing to do here
+			for(int i = 0; i < this->contents.size(); i++)
+			{
+				delete this->contents[i];
+			}
 		};
 };
 

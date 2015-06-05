@@ -9,6 +9,14 @@
 #include "vnobject.h"
 
 
+/* Control functions */
+
+// Create a Text object
+unsigned int makeText(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+
+// End a Text object... there's no function for this because Text objects are implicitly ended
+
+
 /************************************************
  * Visual Novel Text
  * VNObject that contains and displays wstring text
@@ -119,6 +127,10 @@ class TextBox : public VNObject
 						wcout << L"No specified location for given parameter value in this Text object";
 						break;
 					
+					// Content
+					case TXT_TOKEN:
+						this->content = params[i].second;
+					
 					// All other delimiters
 					default:
 						return i;
@@ -158,6 +170,12 @@ class TextBox : public VNObject
 			
 			// Continue within component
 			return -1;
+		};
+		
+		/* Destructor */
+		~Text()
+		{
+			// Nothing to do here
 		};
 };
 

@@ -33,34 +33,16 @@ unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair
 {
 	Container* c = vn->getActiveCont();
 	
-	if(c == NULL) // No Container to store parameters inside
+	if(c != NULL)
 	{
-		return params.size();
+		// Set parameters
+		return c->setData(start, params);
 	}
-	
-	// Set parameters
-	for(int i = start; i < params.size(); i++)
+	else // No Container to store parameters inside
 	{
-		switch(params[i].first)
-		{
-			// Container parameter
-			case CONT_PARAM:
-				i = c->setData(start, params);
-				break;
-			
-			// Value for Container parameter, but cannot be handled
-			case PARAM_VAL:
-				wcout << L"Cannot handle Container parameter value '" << params[i].second << L"' without knowing where it belongs\n";
-				break;
-			
-			// Insignificant symbol here
-			default:
-				return i;
-		}
+		wcout << L"No Container to set parameters for";
+		return params.size() - 1;
 	}
-	
-	// Finished processing all parameters
-	return params.size() - 1;
 };
 
 

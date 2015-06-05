@@ -55,7 +55,7 @@ unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<i
 		last_comp = last_cont->getContAt(last_cont->getCurrent() - 1);
 		
 		t = new TextBox(last_cont->getCurrent());
-		c = f;
+		c = t;
 		
 		// Set ending of last_comp to reference this TextBox
 		if(last_comp != NULL)
@@ -64,26 +64,7 @@ unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<i
 		}
 		
 		// Set any other parameters if they exist
-		for(int i = out; i < params.size(); i++)
-		{
-			switch(params[i].first)
-			{
-				// TextBox parameter
-				case COMP_PARAM:
-					i = c->setData(start, params);
-					break;
-				
-				// Value for TextBox parameter, but cannot be handled
-				case PARAM_VAL:
-					wcout << L"Cannot handle TextBox parameter value '" << params[i].second << L"' without knowing where it belongs\n";
-					break;
-				
-				// Insignificant symbol here
-				default:
-					out = i;
-					break;
-			}
-		}
+		out = c->setData(out, params);
 		
 		// Add TextBox to Container and end
 		last_cont->addComp(c);
@@ -95,18 +76,39 @@ unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<i
 unsigned int endTextBox(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
 {
 	Container* cont = vn->getActiveCont();
-	Component* c = cont->getActiveComp();
+	Component* c;
 	
-	// End this component for good
-	if(c != NULL)
+	if(cont != NULL)
 	{
-		// Assume that the next component is at the end, and set again if the situation changes
-		VNObject* v = c->getObjAt(c->getCurrent() - 1);
-		v->setEnd( cont->getCurrent() );
+		c = cont->getActiveComp();
+		
+		// End this component for good
+		if(c != NULL )
+		{
+			// Assume that the next component is at the end, and set again if the situation changes
+			VNObject* v = c->getObjAt(c->getCurrent() - 1);
+			v->setEnd( cont->getCurrent() );
+			
+			// Implicitly set a pause at the end of a TextBox
+			pair<int, wstring> p[] = {make_pair(OBJ_PARAM, L"p")};
+			vector<pair<int, wstring>> pause(p, p + sizeof(p)/sizeof(pair<int, wstring>));
+			vnobjects[L"obj_param"](vn, 0, pause);
+			
+			// Component is no longer active for editing
+			cont->deactivateContent();
+		}
+		else
+		{
+			wcout << L"No TextBox to end";
+		}
+		
+		// On end, ignore the rest of params
+		return params.size() - 1;
 	}
-	
-	// On end, ignore the rest of params
-	return params.size() - 1;
+	else
+	{
+		wcout << L"No Container; therefore, no TextBox to end";
+	}
 };
 
 

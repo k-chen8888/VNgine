@@ -66,12 +66,6 @@ class VNObject
 		{
 			return this->end > -1;
 		};
-		
-		/* Destructor */
-		~VNObject()
-		{
-			// Nothing to do here
-		};
 };
 
 

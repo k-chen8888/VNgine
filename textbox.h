@@ -135,7 +135,10 @@ class TextBox : public Component
 		/* Destructor */
 		~TextBox()
 		{
-			// Nothing to do here
+			for(int i = 0; i < this->contents.size(); i++)
+			{
+				delete this->contents[i];
+			}
 		};
 };
 

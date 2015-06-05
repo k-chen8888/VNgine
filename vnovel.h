@@ -314,7 +314,9 @@ class VNovel
 		~VNovel()
 		{
 			for(int i = 0; i < this->cont.size(); i++)
+			{
 				delete this->cont[i];
+			}
 		};
 };
 

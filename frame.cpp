@@ -64,26 +64,7 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	}
 	
 	// Set any other parameters if they exist
-	for(int i = out; i < params.size(); i++)
-	{
-		switch(params[i].first)
-		{
-			// Frame parameter
-			case CONT_PARAM:
-				i = c->setData(start, params);
-				break;
-			
-			// Value for frame parameter, but cannot be handled
-			case PARAM_VAL:
-				wcout << L"Cannot handle Frame parameter value '" << params[i].second << L"' without knowing where it belongs\n";
-				break;
-			
-			// Insignificant symbol here
-			default:
-				out = i;
-				break;
-		}
-	}
+	out = c->setData(out, params);
 	
 	// Add Container to VNovel and end
 	vn->addCont(c);

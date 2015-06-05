@@ -75,8 +75,8 @@ class Container
 			}
 		};
 		
-		// Deactivate a component for editing
-		void deactivateComp()
+		// Deactivate a content element
+		void deactivateContent()
 		{
 			if(this->current < this->contents.size() - 1)
 			{

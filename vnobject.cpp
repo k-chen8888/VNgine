@@ -25,8 +25,8 @@ using namespace std;
 
 /* Control functions */
 
-// Add parameters to a Component
-unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+// Add parameters to a VNObject
+unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
 {
 	Container* cont = vn->getActiveCont();
 	Component* c;
@@ -38,22 +38,31 @@ unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair
 		
 		if(c != NULL)
 		{
-			// Set parameters
-			return c->setData(start, params);
+			if(c->getNumObj() > 0)
+			{
+				VNObject* v = c->getObjAt(c->getNumObj() - 1);
+				
+				// Set parameters
+				return v->setData(start, params);
+			}
+			else
+			{
+				wcout << L"No VNObjects to set parameters for";
+			}
 		}
 		else
 		{
-			wcout << L"No Component to store parameters in";
+			wcout << L"No Component; therefore, no VNObject to store parameters in";
 		}
 	}
 	else
 	{
-		wcout << L"No Container; therefore, no place to store Component parameters";
+		wcout << L"No Container; therefore, no VNObject to store parameters in";
 	}
 	
 	return params.size() - 1;
 };
 
 
-// Add helper keywords
-addToComponents(L"comp_param", &setCompParams);
+// Add keywords to map
+addToVNObjects(L"obj_param", &setObjParams);
