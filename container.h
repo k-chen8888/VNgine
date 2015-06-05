@@ -57,7 +57,7 @@ class Container
 					next.push_back( std::make_pair(stop_pt, n) );
 				}
 			}
-			else // Set the next container to jump to only if it exists
+			else // Set the next container to jump to a new Container only if it exists
 			{
 				if(this->next.size() > 0)
 				{
@@ -65,6 +65,30 @@ class Container
 				}
 			}
 		};
+		
+		// Set content as active for editing
+		void addActive(T* c)
+		{
+			if(c != NULL)
+			{
+				this->contents.push_back(c);
+			}
+		};
+		
+		// Deactivate a component for editing
+		void deactivateComp()
+		{
+			if(this->current < this->contents.size() - 1)
+			{
+				this->current = this->contents.size();
+			}
+		};
+		
+		// Freeze content
+		virtual unsigned int freeze() = 0;
+		
+		// Unfreeze content
+		virtual unsigned int unfreeze() = 0;
 		
 		/* Playback */
 		
@@ -84,13 +108,13 @@ class Container
 			return out;
 		};
 		
-		// Get index of active Component
+		// Get index of active content element
 		unsigned int getCurrent()
 		{
 			return this->current;
-		}
+		};
 		
-		// Check if there is a Component active for editing
+		// Check if there is content active for editing
 		bool hasActive()
 		{
 			if(this->current < this->contents.size())
@@ -99,8 +123,8 @@ class Container
 				return false;
 		};
 		
-		// Retrieve active Component (the one being played/edited)
-		Component* getActiveComp()
+		// Retrieve active content element (the one being played/edited)
+		T* getActive()
 		{
 			if(this->current < this->contents.size())
 				return this->contents[this->current];
@@ -108,8 +132,8 @@ class Container
 				return NULL;
 		};
 		
-		// Retrieve a Component at some index
-		Component* getComp(unsigned int index)
+		// Retrieve a content element at some index
+		T* getContentAt(unsigned int index)
 		{
 			if(index < this->contents.size())
 				return this->contents[index];
@@ -117,10 +141,19 @@ class Container
 				return NULL;
 		};
 		
-		// Get the number of Components
-		unsigned int getNumComp()
+		// Get the number of content elements
+		unsigned int getNumContents()
 		{
 			return this->contents.size();
+		};
+		
+		// Get most recently frozen content element from stack
+		T* lastFrozen()
+		{
+			if(this->frz.size() > 0)
+				return this->frz.back();
+			else
+				return NULL;
 		};
 };
 

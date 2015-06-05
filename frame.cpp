@@ -36,6 +36,15 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	Container* c;
 	Container* last_frame;
 	
+	// Check if previous Frame was closed out properly (prevents ID collisions from vn->getCurr())
+	if(vn->getCurr() < vn->numCont())
+	{
+		// Clean up the mess
+		// Don't save the output; still working on params
+		endFrame(vn, start, params);
+	}
+	last_frame = vn->getContAt(vn->getCurr() - 1);
+	
 	// Create a new frame
 	if(params[out].first == L'\'')
 	{
@@ -47,15 +56,6 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 		f = new Frame(L"", vn->getCurr());
 	}
 	c = f;
-	
-	// Check if previous frame was closed out properly
-	if(vn->getCurr() < vn->numCont())
-	{
-		// Clean up the mess
-		// Don't save the output; still working on params
-		endFrame(vn, start, params);
-	}
-	last_frame = vn->getContAt(vn->getCurr() - 1);
 	
 	// Set ending of last_frame to reference this frame
 	if(last_frame != NULL)
@@ -69,13 +69,13 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 		switch(params[i].first)
 		{
 			// Frame parameter
-			case F_PARAM:
+			case CONT_PARAM:
 				i = c->setData(start, params);
 				break;
 			
 			// Value for frame parameter, but cannot be handled
 			case PARAM_VAL:
-				wcout << L"Cannot handle frame parameter value '" << params[i].second << L"' without knowing what it is\n";
+				wcout << L"Cannot handle Frame parameter value '" << params[i].second << L"' without knowing where it belongs\n";
 				break;
 			
 			// Insignificant symbol here
@@ -85,7 +85,7 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 		}
 	}
 	
-	// Add Container to list and end
+	// Add Container to VNovel and end
 	vn->addCont(c);
 	return out;
 };
@@ -122,7 +122,7 @@ void addSpriteToFrame(Container* f, std::wstring spritefile)
 		wcout << L"'" << spritefile << L"' threw error code " << err;
 };
 
-// End a Frame, closing out all frozen and active Components
+// End a Frame, closing out all frozen and active content
 unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
 {
 	Container* curr_frame = vn->getActiveCont();
@@ -130,6 +130,27 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>>
 	// End the last existing frame for good
 	if(curr_frame != NULL)
 	{
+		next = 1;
+		// Check for and end any frozen Components
+		while(next > 0)
+		{
+			// Get active Component and end it
+			int next = curr_frame->unfreeze();
+			Component* uf = curr_frame->getActiveComp();
+			
+			// Add to this Component's next list
+			if(next > 0)
+			{
+				Component* f = curr_frame->lastFrozen();
+				uf->setNext(f->getID(), NULL);
+				uf->setNext(f->getID(), f);
+			}
+			else
+			{
+				uf->setNext(curr_frame->getCurrent(), NULL);
+			}
+		}
+		
 		// End of frame is the current position (which should be the number of components at the very end)
 		curr_frame->setNext(curr_frame->getCurrent(), NULL);
 		vn->deactivateCont();
@@ -141,5 +162,5 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>>
 
 
 // Add keywords to map
-addToKeywords(L"frame", &makeFrame);
-addToKeywords(L"endframe", &endFrame);
+addToContainers(L"frame", &makeFrame);
+addToContainers(L"endframe", &endFrame);

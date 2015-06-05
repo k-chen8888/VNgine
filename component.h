@@ -14,7 +14,7 @@ class Component
 {
 	protected:
 		// Identifying information
-		int index                                       // Index in list
+		unsigned int index;                          // Index in list
 		
 		// Modifier map (keywords -> integers)
 		std::map<std::wstring, int> mod;
@@ -41,9 +41,34 @@ class Component
 		// Tell this Component where to stop and where to go next
 		void setNext(int stop_pt, Component* next)
 		{
-			if(stop_pt > -1)
-				next.push_back( std::make_pair(stop_pt, next) );
+			if(n == NULL)
+			{
+				if(stop_pt > -1)
+				{
+					next.push_back( std::make_pair(stop_pt, n) );
+				}
+			}
+			else // Set the next Component to jump to a new Component only if it exists
+			{
+				if(this->next.size() > 0)
+				{
+					this->next[this->next.size() - 1].second = n;
+				}
+			}
 		};
+		
+		// Add a VNObject
+		void addObj(VNObject* v)
+		{
+			this->contents.push_back(v);
+			this->current += 1;
+		};
+		
+		// Freeze Component
+		virtual void freeze() = 0;
+		
+		// Unfreeze Component
+		virtual void unfreeze() = 0;
 		
 		/* Playback */
 		
@@ -56,32 +81,26 @@ class Component
 		
 		/* Reporting */
 		
-		// Get index of active VNObject
+		// Get identifying index
+		unsigned int getID()
+		{
+			return this->index;
+		}
+		
+		// Get traversal position
 		unsigned int getCurrent()
 		{
 			return this->current;
 		}
 		
-		// Check if there is a VNObject active for editing
-		bool hasActive()
+		// Check if there are any VNObjects
+		bool hasObj()
 		{
-			if(this->current < this->contents.size())
-				return this->active == this->contents[this->current];
-			else
-				return false;
-		};
-		
-		// Retrieve active VNObject (the one being played/edited)
-		VNObject* getActiveObj()
-		{
-			if(this->current < this->contents.size())
-				return this->contents[this->current];
-			else
-				return NULL;
+			return this->contents.size() > 0;
 		};
 		
 		// Retrieve a VNObject at some index
-		VNObject* getObj(unsigned int index)
+		VNObject* getObjAt(unsigned int index)
 		{
 			if(index < this->contents.size())
 				return this->contents[index];

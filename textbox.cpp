@@ -31,16 +31,85 @@ using namespace std;
 // Create a TextBox
 unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
 {
+	unsigned int out = start;
+	TextBox* t;
+	Component* c;
+	Container* last_cont = vn->getActiveCont();
+	Component* last_comp;
 	
+	// Create a TextBox
+	if(last_cont == NULL)
+	{
+		wcout << "Nowhere to store this component";
+		return start;
+	}
+	else
+	{
+		// Check if previous TextBox was closed out properly
+		if(last_cont->getCurrent() < last_cont->getNumComp())
+		{
+			// Clean up the mess
+			// Don't save the output; still working on params
+			endTextBox(vn, start, params);
+		}
+		last_comp = last_cont->getContAt(last_cont->getCurrent() - 1);
+		
+		t = new TextBox(last_cont->getCurrent());
+		c = f;
+		
+		// Set ending of last_comp to reference this TextBox
+		if(last_comp != NULL)
+		{
+			last_comp->setNext(0, c);
+		}
+		
+		// Set any other parameters if they exist
+		for(int i = out; i < params.size(); i++)
+		{
+			switch(params[i].first)
+			{
+				// TextBox parameter
+				case COMP_PARAM:
+					i = c->setData(start, params);
+					break;
+				
+				// Value for TextBox parameter, but cannot be handled
+				case PARAM_VAL:
+					wcout << L"Cannot handle TextBox parameter value '" << params[i].second << L"' without knowing where it belongs\n";
+					break;
+				
+				// Insignificant symbol here
+				default:
+					out = i;
+					break;
+			}
+		}
+		
+		// Add TextBox to Container and end
+		last_cont->addComp(c);
+		return out;
+	}
 };
 
-// End a TextBox, closing out all frozen and active VNObjects
+// End a TextBox
 unsigned int endTextBox(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
 {
+	Container* cont = vn->getActiveCont();
+	Component* c = cont->getActiveComp();
 	
+	// End this component for good
+	if(c != NULL)
+	{
+		// Assume that the next component is at the end, and set again if the situation changes
+		VNObject* v = c->getObjAt(c->getCurrent() - 1);
+		v->setEnd( cont->getCurrent() );
+	}
+	
+	// On end, ignore the rest of params
+	return params.size() - 1;
 };
 
 
 // Add keywords to map
-addToKeywords(L"textbox", &makeTextBox);
-addToKeywords(L"endtextbox", &endTextBox);
+addToComponents(L"textbox", &makeTextBox);
+addToComponents(L"endtextbox", &endTextBox);

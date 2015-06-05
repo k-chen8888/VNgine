@@ -276,29 +276,30 @@ class Frame : public Container<Component>
 			}
 			
 			return params.size() -1;
-		}
-		
-		// Set a component as active for editing
-		void addActiveComp(Component* c)
-		{
-			if(c != NULL)
-			{
-				this->contents.push_back(c);
-			}
 		};
 		
-		// Deactivate a component for editing
-		void deactivateComp()
+		// Freeze content and return how many things are frozen
+		unsigned int freeze()
 		{
-			if(this->current == this->contents.size() - 1)
+			this->frz.push_back(this->contents.back());
+			this->contents.pop_back();
+			this->deactivateComp();
+			
+			return this->frz.size();
+		};
+		
+		// Unfreeze content and return how many things are frozen
+		unsigned int unfreeze()
+		{
+			if(this->frz.size() > 0)
 			{
-				this->current += 1;
+				Component* frozen = this->frz.back();
+				this->current = frozen->getID();
+				this->frozen.pop_back();
 			}
-			else
-			{
-				this->current = this->contents.size();
-			}
-		}
+			
+			return this->frz.size();
+		};
 		
 		/* Playback */
 		
