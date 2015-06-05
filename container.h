@@ -14,6 +14,9 @@
 // Add parameters to a Container
 unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
 
+// Ignores comments
+unsigned int ignoreComments(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+
 
 /* Abstract class for a visual novel component container
  */

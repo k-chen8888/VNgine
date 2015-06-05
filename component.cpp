@@ -53,7 +53,3 @@ unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair
 	
 	return params.size() - 1;
 };
-
-
-// Add helper keywords
-addToComponents(L"comp_param", &setCompParams);

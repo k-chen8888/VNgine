@@ -62,7 +62,3 @@ unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector<std::pair<
 	
 	return params.size() - 1;
 };
-
-
-// Add keywords to map
-addToVNObjects(L"obj_param", &setObjParams);

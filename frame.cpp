@@ -140,8 +140,3 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>>
 	// On end, ignore the rest of params
 	return params.size() - 1;
 };
-
-
-// Add keywords to map
-addToContainers(L"frame", &makeFrame);
-addToContainers(L"endframe", &endFrame);

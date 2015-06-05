@@ -314,15 +314,21 @@ int setUnicode(bool in, bool out)
 		int err = _setmode(_fileno(stdin), _O_U16TEXT);
 		
 		if(err == -1)
+		{
+			cout << SET_IN_ERR;
 			return SET_IN;
+		}
 	}
 	
 	if(out)
 	{
-		_setmode(_fileno(stdout), _O_U16TEXT);
+		int err = _setmode(_fileno(stdout), _O_U16TEXT);
 		
 		if(err == -1)
+		{
+			cout << SET_OUT_ERR;
 			return SET_OUT;
+		}
 	}
 	
 	return 0;

@@ -110,8 +110,3 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, vector<pair<int, wstring
 		wcout << L"No Container; therefore, no TextBox to end";
 	}
 };
-
-
-// Add keywords to map
-addToComponents(L"textbox", &makeTextBox);
-addToComponents(L"endtextbox", &endTextBox);

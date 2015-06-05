@@ -45,6 +45,8 @@ unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair
 	}
 };
 
-
-// Add helper keywords
-addToContainers(L"cont_param", &setContParams);
+// Ignores comments
+unsigned int ignoreComments(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+{
+	return params.size() - 1;
+};

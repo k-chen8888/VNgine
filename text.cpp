@@ -47,6 +47,3 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector<std::pair<int,
 };
 
 // End a Text object... there's no function for this because Text objects are implicitly ended
-
-
-addToVNObjects(L"text", &makeText);
