@@ -36,7 +36,7 @@ class Container
 		std::vector<std::pair<int, Container*>> next; // Next Container to play (the final element in the queue is the true "end" of the Container)
 		
 		// Error messages
-		std::vector<std::wstring> err;
+		std::vector<std::pair<int, std::wstring>> err;
 	
 	public:
 		/*******************************************
