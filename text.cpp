@@ -38,7 +38,8 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector<std::pair<int,
 	
 	if(last_cont == NULL)
 	{
-		
+		wcout << L"Nowhere to add this object";
+		return start;
 	}
 	else
 	{

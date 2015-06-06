@@ -25,15 +25,15 @@ class Container
 {
 	protected:
 		// Identifying information
-		std::wstring name;                            // Name
-		int index;                                    // Index in list
+		std::wstring name;                     // Name
+		int index;                             // Index in list
 		
 		// Traversal
-		unsigned int current;                         // Current position being played/edited
-		std::vector<T*> contents;                     // Stuff inside this Container
-		std::vector<T*> frz;                          // Stack of frozen T (editing only)
-		unsigned int ending;                          // Index of the next Container to play
-		std::vector<std::pair<int, Container*>> next; // Next Container to play (the final element in the queue is the true "end" of the Container)
+		unsigned int current;                  // Current position being played/edited
+		std::vector<T*> contents;              // Stuff inside this Container
+		std::vector<T*> frz;                   // Stack of frozen T* (editing only)
+		unsigned int ending;                   // Index of the ending that will be reached next
+		std::vector<std::pair<int, int>> next; // Index of the next Container to play (the final element in the queue is the true "end" of the Container)
 		
 		// Error messages
 		std::vector<std::pair<int, std::wstring>> err;
@@ -49,18 +49,17 @@ class Container
 		virtual unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
 		
 		// Tell this Container where to stop and where to go next
-		// When given no Container*, assume there is no next container to jump to (NULL)
-		// When given a Container*, set the pair at the end of the vector jump to this Container*
-		void setNext(int stop_pt, Container* n)
+		// -1 implies that there is nothing left to jump to
+		void setNext(int stop_pt, int n)
 		{
-			if(n == NULL)
+			if(n < 0)
 			{
 				if(stop_pt > -1)
 				{
-					next.push_back( std::make_pair(stop_pt, n) );
+					this->next.push_back( std::make_pair(stop_pt, n) );
 				}
 			}
-			else // Set the next container to jump to a new Container only if it exists
+			else // Set next Container's index for the last ending in the list
 			{
 				if(this->next.size() > 0)
 				{

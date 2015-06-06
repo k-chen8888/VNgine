@@ -40,7 +40,7 @@ unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<i
 	// Create a TextBox
 	if(last_cont == NULL)
 	{
-		wcout << "Nowhere to store this component";
+		wcout << L"Nowhere to store this component";
 		return start;
 	}
 	else
@@ -101,12 +101,13 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, vector<pair<int, wstring
 		{
 			wcout << L"No TextBox to end";
 		}
-		
-		// On end, ignore the rest of params
-		return params.size() - 1;
 	}
 	else
 	{
 		wcout << L"No Container; therefore, no TextBox to end";
 	}
+	
+		
+	// On end, ignore the rest of params
+	return params.size() - 1;
 };

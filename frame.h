@@ -12,9 +12,9 @@
 // Macros for warnings
 // Warnings happen when the object is unsure if erratic behavior is intended
 // All warnings have the code -1
-#define BAD_DELIM_WARN   std::wstring(L"[Warning] Incorrect delimiter for frame parameters")
+#define BAD_DELIM_WARN   std::wstring(L"[Warning] Incorrect delimiter for Frame parameters")
 #define END_PLAY_WARN    std::wstring(L"[Warning] Reached end of playback")
-#define HAS_ACTIVE_WARN  std::wstring(L"[Warning] Tried to add an active frame, but there was already one in existance (compensating by auto-ending frame)")
+#define HAS_ACTIVE_WARN  std::wstring(L"[Warning] Tried to add an active Frame, but there was already one in existance (compensating by auto-ending it)")
 
 
 // Macros for error messages
@@ -302,7 +302,7 @@ class Frame : public Container<Component>
 		/* Playback */
 		
 		// Play through components (to GUI if gui == true, otherwise, to a command line)
-		// Output the index of the next frame to jump to
+		// Output the index of the next Frame to jump to
 		int play(bool gui)
 		{
 			while(this->current < this->contents.size()
@@ -316,8 +316,9 @@ class Frame : public Container<Component>
 				if(this->ending >= this->next.size() - 1)
 					this->err.push_back(std::make_pair(-1, END_PLAY_WARN));
 				
+				// Update ending and return the next Frame to play
 				this->ending += 1;
-				return this->next[this->ending].first;
+				return this->next[this->ending - 1].second;
 			}
 		};
 		

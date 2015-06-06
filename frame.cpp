@@ -34,16 +34,19 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	unsigned int out = start;
 	Frame* f;
 	Container* c;
-	Container* last_frame;
+	Container* prev_frame;
 	
 	// Check if previous Frame was closed out properly (prevents ID collisions from vn->getCurr())
+	int prev = -1;
 	if(vn->getCurr() < vn->numCont())
 	{
 		// Clean up the mess
-		// Don't save the output; still working on params
-		endFrame(vn, start, params);
+		// Save the index of the previous Frame
+		prev = endFrame(vn, start, params) - (params.size() - 1);
 	}
-	last_frame = vn->getContAt(vn->getCurr() - 1);
+	// Get the previously closed Frame back
+	if (prev > -1)
+		prev_frame = vn->getContAt(prev);
 	
 	// Create a new frame
 	if(params[out].first == L'\'')
@@ -57,10 +60,10 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	}
 	c = f;
 	
-	// Set ending of last_frame to reference this frame
-	if(last_frame != NULL)
+	// Set ending of prev_frame to reference this Frame
+	if(prev_frame != NULL)
 	{
-		last_frame->setNext(0, c);
+		prev_frame->setNext(0, c->getID().second);
 	}
 	
 	// Set any other parameters if they exist
@@ -107,36 +110,37 @@ void addSpriteToFrame(Container* f, std::wstring spritefile)
 unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
 {
 	Container* curr_frame = vn->getActiveCont();
+	Component* uf;
 	
-	// End the last existing frame for good
+	// End the last existing Frame for good
 	if(curr_frame != NULL)
 	{
-		next = 1;
+		int numfrz = curr_frame->unfreeze();
+		uf = curr_frame->getActiveComp();
+		
 		// Check for and end any frozen Components
-		while(next > 0)
+		while(uf != NULL)
 		{
-			// Get active Component and end it
-			int next = curr_frame->unfreeze();
-			Component* uf = curr_frame->getActiveComp();
-			
 			// Add to this Component's next list
-			if(next > 0)
+			uf->setNext(curr_frame->getCurrent(), -1);
+			if(numfrz > 0)
 			{
+				// Set jump to the next component that will be unfrozen
 				Component* f = curr_frame->lastFrozen();
-				uf->setNext(f->getID(), NULL);
-				uf->setNext(f->getID(), f);
+				uf->setNext(curr_frame->getCurrent(), f->getID());
 			}
-			else
-			{
-				uf->setNext(curr_frame->getCurrent(), NULL);
-			}
+			
+			// Continue unfreezing
+			numfrz = curr_frame->unfreeze();
+			uf = curr_frame->getActiveComp();
 		}
 		
-		// End of frame is the current position (which should be the number of components at the very end)
-		curr_frame->setNext(curr_frame->getCurrent(), NULL);
+		// End of Frame is the current position
+		curr_frame->setNext(curr_frame->getCurrent(), -1);
 		vn->deactivateCont();
 	}
 	
 	// On end, ignore the rest of params
-	return params.size() - 1;
+	// Also add on this Frame's index
+	return curr_frame->getID().second + params.size() - 1;
 };

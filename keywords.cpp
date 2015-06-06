@@ -51,6 +51,7 @@ void addKeywords()
 	addToComponents(L"textbox", &makeTextBox);
 	addToComponents(L"endtextbox", &endTextBox);
 	
+	
 	/* VNObjects */
 	addToVNObjects(L"obj_param", &setObjParams);
 	

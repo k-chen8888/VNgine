@@ -14,16 +14,16 @@ class Component
 {
 	protected:
 		// Identifying information
-		unsigned int index;                          // Index in list
+		unsigned int index;                    // Index in list
 		
 		// Modifier map (keywords -> integers)
 		std::map<std::wstring, int> mod;
 		
 		// Traversal
-		unsigned int current;                         // Current position being played/edited
-		std::vector<VNObject*> contents;              // Stuff inside this Component
-		unsigned int ending;                          // Index of the next Component to play
-		std::vector<std::pair<int, Component*>> next; // Next Component to play (the final element in the queue is the true "end" of the Component)
+		unsigned int current;                  // Current position being played/edited
+		std::vector<VNObject*> contents;       // Stuff inside this Component
+		unsigned int ending;                   // Index of the ending that will be reached next
+		std::vector<std::pair<int, int>> next; // Index of the next Component to play (the final element in the queue is the true "end" of the Component)
 		
 		// Error messages
 		std::vector<std::wstring> err;
@@ -39,16 +39,17 @@ class Component
 		virtual unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
 		
 		// Tell this Component where to stop and where to go next
-		void setNext(int stop_pt, Component* next)
+		// -1 implies that there is nothing left to jump to
+		void setNext(int stop_pt, int n)
 		{
-			if(n == NULL)
+			if(n < 0)
 			{
 				if(stop_pt > -1)
 				{
-					next.push_back( std::make_pair(stop_pt, n) );
+					this->next.push_back( std::make_pair(stop_pt, n) );
 				}
 			}
-			else // Set the next Component to jump to a new Component only if it exists
+			else // Set next Component's index for the last ending in the list
 			{
 				if(this->next.size() > 0)
 				{
