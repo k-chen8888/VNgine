@@ -50,6 +50,7 @@ class VNovel
 		std::vector<wchar_t> ignore;   // Clean these out of the front and back of stored strings
 		
 		std::vector<Container*> cont;  // VN components, stored in Container objects
+		int prev;                      // Index of previous Container in vector (editing only)
 		unsigned int curr;             // Index of current Container in vector
 		
 		std::vector<std::wstring> err; // Error messages
@@ -62,6 +63,7 @@ class VNovel
 		VNovel(std::wstring src)
 		{
 			this->source = src;
+			this->prev = -1;
 			this->curr = 0;
 			
 			//Set unicode input/output
@@ -254,16 +256,11 @@ class VNovel
 		};
 		
 		// Deactivate Container for editing
+		// Save previous Container's index
 		void deactivateCont()
 		{
-			if(this->curr == this->cont.size() - 1)
-			{
-				this->curr += 1;
-			}
-			else
-			{
-				this->curr = this->cont.size();
-			}
+			this->prev = this->curr;
+			this->curr = this->cont.size();
 		};
 		
 		/* Playback */
@@ -271,7 +268,6 @@ class VNovel
 		// Plays the visual novel
 		int playNovel(bool gui)
 		{
-			
 			return 0;
 		};
 		
@@ -289,14 +285,11 @@ class VNovel
 			return this->curr;
 		};
 		
-		// Currently active Container
-		Container* getActiveCont()
+		// Index of previously active Container
+		int getPrev()
 		{
-			if(this->curr < this->cont.size())
-				return this->cont[this->curr];
-			else
-				return NULL;
-		}
+			return this->prev;
+		};
 		
 		// Container at given index
 		Container* getContAt(unsigned int index)

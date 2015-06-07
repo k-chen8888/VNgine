@@ -32,19 +32,38 @@ using namespace std;
 unsigned int makeText(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
 {
 	unsigned int out = start;
+	Container* cont = vn->getActiveCont();
+	Component* comp;
 	Text* t;
-	Component* c;
-	Container* last_cont = vn->getActiveCont();
+	VNObject* v;
 	
-	if(last_cont == NULL)
+	// Check if there is a Container to store this VNObject inside
+	if(cont == NULL)
 	{
-		wcout << L"Nowhere to add this object";
+		wcout << L"No active Container to store this object inside";
 		return start;
 	}
-	else
+	
+	// Check if there is a Component to store this VNObject in
+	c = last_cont->getContentAt(last_cont->getCurrent());
+	if(c == NULL)
 	{
-		c = last_cont
+		wcout << L"No active Component to store this VNObject inside";
+		return start;
 	}
+	
+	// Create the VNObject
+	t = new Text(L"");
+	v = t;
+	
+	// Set parameters if there are any
+	out = v->setData(out, params);
+	
+	// Add this VNObject to the component
+	c->addObj(v);
+	
+	// End
+	return out;
 };
 
 // End a Text object... there's no function for this because Text objects are implicitly ended

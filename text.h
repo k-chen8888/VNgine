@@ -141,7 +141,6 @@ class TextBox : public VNObject
 		/* Playback */
 		
 		// Play the VNObject
-		// Return index to the next Component (or -1 to continue within the same Component)
 		int play(bool gui)
 		{
 			if(gui)
@@ -159,14 +158,6 @@ class TextBox : public VNObject
 					wcin.ignore( numeric_limits <streamsize> ::max(), '\n' );
 				}
 			}
-			
-			// Freeze component?
-			if(freeze > -1)
-				return freeze;
-			
-			// End component?
-			if(end > -1)
-				return end;
 			
 			// Continue within component
 			return -1;

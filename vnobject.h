@@ -13,10 +13,6 @@ unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector<std::pair<
 class VNObject
 {
 	protected:
-		// Traversal
-		int freeze; // Freeze the component if this is > -1 (also tells which Component to go to)
-		int end;    // End the component if this is > -1 (also tells which Component to go to)
-		
 		// Modifier map (keywords -> integers)
 		std::map<std::wstring, int> mod;
 		
@@ -32,20 +28,6 @@ class VNObject
 		
 		// Fill in parameters
 		virtual unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
-		
-		// Set freeze point
-		void setFreeze(int next)
-		{
-			if(next > -1)
-				this->freeze = next;
-		};
-		
-		// Set end point
-		void setEnd(int next)
-		{
-			if(next > -1)
-				this->end = next;
-		};
 		
 		/* Playback */
 		

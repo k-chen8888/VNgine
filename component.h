@@ -14,16 +14,18 @@ class Component
 {
 	protected:
 		// Identifying information
-		unsigned int index;                    // Index in list
+		std::wstring type;               // Class name
+		unsigned int index;              // Index in list
 		
 		// Modifier map (keywords -> integers)
 		std::map<std::wstring, int> mod;
 		
 		// Traversal
+		int previous;                          // Previously edited position (editing only)
 		unsigned int current;                  // Current position being played/edited
 		std::vector<VNObject*> contents;       // Stuff inside this Component
 		unsigned int ending;                   // Index of the ending that will be reached next
-		std::vector<std::pair<int, int>> next; // Index of the next Component to play (the final element in the queue is the true "end" of the Component)
+		std::vector<std::pair<int, int>> next; // Index of the next Container to play (the final element in the queue is the true "end" of the Container)
 		
 		// Error messages
 		std::vector<std::wstring> err;
@@ -38,6 +40,13 @@ class Component
 		// Fill in parameters
 		virtual unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
 		
+		// Add a VNObject
+		void addObj(VNObject* v)
+		{
+			this->contents.push_back(v);
+			this->current += 1;
+		};
+		
 		// Tell this Component where to stop and where to go next
 		// -1 implies that there is nothing left to jump to
 		void setNext(int stop_pt, int n)
@@ -49,7 +58,7 @@ class Component
 					this->next.push_back( std::make_pair(stop_pt, n) );
 				}
 			}
-			else // Set next Component's index for the last ending in the list
+			else // Set next Container's index for the last ending in the list
 			{
 				if(this->next.size() > 0)
 				{
@@ -58,18 +67,15 @@ class Component
 			}
 		};
 		
-		// Add a VNObject
-		void addObj(VNObject* v)
+		// Deactivate a content element
+		void deactivateContent()
 		{
-			this->contents.push_back(v);
-			this->current += 1;
+			if(this->current < this->contents.size() - 1)
+			{
+				this->previous = this->current;
+				this->current = this->contents.size();
+			}
 		};
-		
-		// Freeze Component
-		virtual void freeze() = 0;
-		
-		// Unfreeze Component
-		virtual void unfreeze() = 0;
 		
 		/* Playback */
 		
@@ -86,18 +92,18 @@ class Component
 		unsigned int getID()
 		{
 			return this->index;
+		};
+		
+		// Get class name
+		std::wstring getType()
+		{
+			return this->type;
 		}
 		
 		// Get traversal position
 		unsigned int getCurrent()
 		{
 			return this->current;
-		}
-		
-		// Check if there are any VNObjects
-		bool hasObj()
-		{
-			return this->contents.size() > 0;
 		};
 		
 		// Retrieve a VNObject at some index

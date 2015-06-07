@@ -56,7 +56,13 @@ class TextBox : public Component
 			setUnicode(true, true);
 			
 			// Set identifiers
+			this->type = L"TextBox";
 			this->index = loc;
+			
+			// Default editing/traversal parameters
+			this->previous = -1;
+			this->current = 0;
+			this->end = 0;
 			
 			// Add modifiers to map
 			
@@ -138,13 +144,20 @@ class TextBox : public Component
 			int out = -1;
 			
 			// Play current component until output changes
-			while(out == -1)
+			while(this->current < this->contents.size())
 			{
-				out = this->contents[this->current]->play(gui);
+				// Play and move on to the next content
+				this->contents[this->current]->play(gui);
+				this->current += 1;
+				
+				// Check for an ending point
+				if(this->current - 1 == this->next[this->ending].first)
+				{
+					out = this->next[this->ending].second;
+					this->ending += 1;
+					return out;
+				}
 			}
-			
-			if(out >= this->contents.size())
-				this->err.push_back(std::make_pair(-1, END_PLAY_WARN));
 			
 			return out;
 		};

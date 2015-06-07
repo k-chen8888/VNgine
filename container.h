@@ -25,13 +25,15 @@ class Container
 {
 	protected:
 		// Identifying information
+		std::wstring type;                     // Class name
 		std::wstring name;                     // Name
 		int index;                             // Index in list
 		
 		// Traversal
+		int previous;                          // Previously edited position (editing only)
 		unsigned int current;                  // Current position being played/edited
 		std::vector<T*> contents;              // Stuff inside this Container
-		std::vector<T*> frz;                   // Stack of frozen T* (editing only)
+		std::vector<unsigned int> frz;         // Stack of frozen indices (editing only)
 		unsigned int ending;                   // Index of the ending that will be reached next
 		std::vector<std::pair<int, int>> next; // Index of the next Container to play (the final element in the queue is the true "end" of the Container)
 		
@@ -82,6 +84,7 @@ class Container
 		{
 			if(this->current < this->contents.size() - 1)
 			{
+				this->previous = this->current;
 				this->current = this->contents.size();
 			}
 		};
@@ -110,28 +113,22 @@ class Container
 			return out;
 		};
 		
+		// Get class name
+		std::wstring getType()
+		{
+			return this->type;
+		};
+		
 		// Get index of active content element
 		unsigned int getCurrent()
 		{
 			return this->current;
 		};
 		
-		// Check if there is content active for editing
-		bool hasActive()
+		// Get index of previously active content element
+		unsigned int getPrevious()
 		{
-			if(this->current < this->contents.size())
-				return this->active == this->contents[this->current];
-			else
-				return false;
-		};
-		
-		// Retrieve active content element (the one being played/edited)
-		T* getActive()
-		{
-			if(this->current < this->contents.size())
-				return this->contents[this->current];
-			else
-				return NULL;
+			return this->previous;
 		};
 		
 		// Retrieve a content element at some index
@@ -149,14 +146,17 @@ class Container
 			return this->contents.size();
 		};
 		
-		// Get most recently frozen content element from stack
-		T* lastFrozen()
+		// Get index of the last frozen content element
+		unsigned int lastFrz()
 		{
-			if(this->frz.size() > 0)
-				return this->frz.back();
-			else
-				return NULL;
-		};
+			return this->frz.back();
+		}
+		
+		// Get current number of frozen content elements
+		unsigned int numFrozen()
+		{
+			return this->frz.size();
+		}
 };
 
 

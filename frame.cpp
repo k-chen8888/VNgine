@@ -33,20 +33,14 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 {
 	unsigned int out = start;
 	Frame* f;
-	Container* c;
-	Container* prev_frame;
+	Container* cont;
 	
-	// Check if previous Frame was closed out properly (prevents ID collisions from vn->getCurr())
-	int prev = -1;
+	// Check if previous Container was closed out properly
 	if(vn->getCurr() < vn->numCont())
 	{
-		// Clean up the mess
-		// Save the index of the previous Frame
-		prev = endFrame(vn, start, params) - (params.size() - 1);
+		wcout << L"Open Container preventing creation of new Frame";
+		return start;
 	}
-	// Get the previously closed Frame back
-	if (prev > -1)
-		prev_frame = vn->getContAt(prev);
 	
 	// Create a new frame
 	if(params[out].first == L'\'')
@@ -58,19 +52,16 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	{
 		f = new Frame(L"", vn->getCurr());
 	}
-	c = f;
+	cont = f;
 	
-	// Set ending of prev_frame to reference this Frame
-	if(prev_frame != NULL)
-	{
-		prev_frame->setNext(0, c->getID().second);
-	}
+	// Set ending of previous Container to reference this Frame
+	cont->setNext(vn->getPrev(), vn->getCurr());
 	
 	// Set any other parameters if they exist
-	out = c->setData(out, params);
+	out = cont->setData(out, params);
 	
 	// Add Container to VNovel and end
-	vn->addCont(c);
+	vn->addCont(cont);
 	return out;
 };
 
@@ -110,29 +101,27 @@ void addSpriteToFrame(Container* f, std::wstring spritefile)
 unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
 {
 	Container* curr_frame = vn->getActiveCont();
-	Component* uf;
 	
 	// End the last existing Frame for good
 	if(curr_frame != NULL)
 	{
-		int numfrz = curr_frame->unfreeze();
-		uf = curr_frame->getActiveComp();
-		
-		// Check for and end any frozen Components
-		while(uf != NULL)
+		// Cannot handle things that aren't Frames, so return -1 + params.size() - 1
+		if(curr_frame->getType().compare(L"Frame") != 0)
 		{
-			// Add to this Component's next list
-			uf->setNext(curr_frame->getCurrent(), -1);
-			if(numfrz > 0)
-			{
-				// Set jump to the next component that will be unfrozen
-				Component* f = curr_frame->lastFrozen();
-				uf->setNext(curr_frame->getCurrent(), f->getID());
-			}
-			
-			// Continue unfreezing
-			numfrz = curr_frame->unfreeze();
-			uf = curr_frame->getActiveComp();
+			wcout << L"Open Container is not a Frame";
+			return params.size() - 2;
+		}
+		
+		// Cannot close Frame if there is still something frozen or active, so return -1 + params.size() - 1
+		if(curr_frame->lastFrozen() != NULL)
+		{
+			wcout << L"Cannot close Frame if there is still something frozen";
+			return params.size() - 2;
+		}
+		if(curr_frame->getCurrent() < curr_frame->getNumContents())
+		{
+			wcout << L"Cannot close Frame if there is still something active";
+			return params.size() -2;
 		}
 		
 		// End of Frame is the current position
@@ -141,6 +130,5 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>>
 	}
 	
 	// On end, ignore the rest of params
-	// Also add on this Frame's index
-	return curr_frame->getID().second + params.size() - 1;
+	return params.size() - 1;
 };

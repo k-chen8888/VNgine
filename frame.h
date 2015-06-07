@@ -14,7 +14,6 @@
 // All warnings have the code -1
 #define BAD_DELIM_WARN   std::wstring(L"[Warning] Incorrect delimiter for Frame parameters")
 #define END_PLAY_WARN    std::wstring(L"[Warning] Reached end of playback")
-#define HAS_ACTIVE_WARN  std::wstring(L"[Warning] Tried to add an active Frame, but there was already one in existance (compensating by auto-ending it)")
 
 
 // Macros for error messages
@@ -97,6 +96,7 @@ class Frame : public Container<Component>
 			setUnicode(true, true);
 			
 			// Set identifiers
+			this->type = L"Frame";
 			this->name = n;
 			this->index = i;
 			
@@ -106,7 +106,8 @@ class Frame : public Container<Component>
 			this->mod[L"sfx"].second = &addSFX;       // Sound effects files
 			this->mod[L"sprite"].second = &addSprite; // Sprite image files
 			
-			// Playback control
+			// Default editing/traversal parameters
+			this->previous = -1;
 			this->current = 0;
 			this->ending = 0;
 		};
@@ -170,7 +171,7 @@ class Frame : public Container<Component>
 				for(int i = 0; i < supported.size(); i++){
 					if( bgfile.compare( bgfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 					{
-						this->obj['bg'].first.push_back(bgfile);
+						this->obj[L"bg"].first.push_back(bgfile);
 						return 0;
 					}
 				}
@@ -197,7 +198,7 @@ class Frame : public Container<Component>
 				for(int i = 0; i < supported.size(); i++){
 					if( bgmfile.compare( bgmfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 					{
-						this->obj['bgm'].first.push_back(bgmfile);
+						this->obj[L"bgm"].first.push_back(bgmfile);
 						return 0;
 					}
 				}
@@ -224,7 +225,7 @@ class Frame : public Container<Component>
 				for(int i = 0; i < supported.size(); i++){
 					if( sfxfile.compare( sfxfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 					{
-						this->obj['sfx'].first.push_back(sfxfile);
+						this->obj[L"sfx"].first.push_back(sfxfile);
 						return 0;
 					}
 				}
@@ -249,7 +250,7 @@ class Frame : public Container<Component>
 			{
 				if( spritefile.compare( spritefile.length() - 4, 4, supported ) == 0 ) // Found a supported type
 				{
-					this->obj['sprite'].first.push_back(spritefile);
+					this->obj[L"sprite"].first.push_back(spritefile);
 					return 0;
 				}
 				else
@@ -270,8 +271,7 @@ class Frame : public Container<Component>
 		{
 			if(this->current < this->contents.size())
 			{
-				this->frz.push_back(this->contents[this->current]);
-				this->contents.pop_back();
+				this->frz.push_back(this->current);
 				this->deactivateComp();
 			}
 			else
@@ -287,9 +287,16 @@ class Frame : public Container<Component>
 		{
 			if(this->frz.size() > 0)
 			{
-				Component* frozen = this->frz.back();
-				this->current = frozen->getID();
-				this->frozen.pop_back();
+				if(this->current < this->contents.size())
+				{
+					// Cannot unfreeze while there's an active Component
+				}
+				else
+				{
+					// Reactivate frozen component
+					this->current = this->frz.back();
+					this->frozen.pop_back();
+				}
 			}
 			else
 			{
@@ -320,6 +327,8 @@ class Frame : public Container<Component>
 				this->ending += 1;
 				return this->next[this->ending - 1].second;
 			}
+			
+			return -1;
 		};
 		
 		// Reset playback
