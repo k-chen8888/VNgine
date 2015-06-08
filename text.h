@@ -3,7 +3,10 @@
 
 
 // Base files
+#include "keywords.h"
 #include "vnovel.h"
+#include "container.h"
+#include "component.h"
 #include "vnobject.h"
 
 
@@ -29,13 +32,13 @@ class TextBox : public VNObject
 	
 	public:
 		/* Constructor */
-		Text(std::wstring c)
+		Text(std::wstring txt)
 		{
-			//Set unicode input/output
+			// Set unicode input/output
 			setUnicode(true, true);
 			
-			// Set identifiers
-			this->content = c;
+			// Add data
+			this->content = txt;
 			
 			// Add modifiers to map
 			
@@ -44,6 +47,10 @@ class TextBox : public VNObject
 			this->mod[L"g"] = 255;
 			this->mod[L"b"] = 255;
 			this->mod[L"alpha"] = 100;
+			
+			// Position
+			this->mod[L"x"] = 0;
+			this->mod[L"y"] = 0;
 			
 			// 1 puts a shadow over a non-speaking sprite
 			this->mod[L"highlight"] = 1;
@@ -120,14 +127,24 @@ class TextBox : public VNObject
 						
 						break;
 					
-					// Floating parameter value delimiter (skip)
+					// Floating parameter value delimiter (skip, unless it freezes this VNObject)
 					case COMP_PARAM:
-						wcout << L"No specified location for given parameter value in this Text object";
+						if(params[i].second.compare(FREEZE) == 0)
+						{
+							// Handle freezing on the outside
+							return i;
+						}
+						else
+						{
+							wcout << L"No specified location for given parameter value in this Text object";
+						}
+						
 						break;
 					
 					// Content
 					case TXT_TOKEN:
 						this->content = params[i].second;
+						break;
 					
 					// All other delimiters
 					default:

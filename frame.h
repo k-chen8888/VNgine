@@ -3,6 +3,7 @@
 
 
 // Base files
+#include "keywords.h"
 #include "vnovel.h"
 #include "container.h"
 #include "component.h"
@@ -19,34 +20,22 @@
 // Macros for error messages
 // Errors happen when the object is sure that behavior is wrong
 #define BAD_PARAM        -2
-#define BAD_PARAM_ERR    std::wstring(L"[Frame Error -2] Parameter name not found")
+#define BAD_PARAM_ERR    L"[Frame Error -2] Parameter name not found"
 #define FLOATING_VAL     -3
-#define FLOATING_VAL_ERR std::wstring(L"[Frame Error -3] Tried to add value without giving a parameter name")
+#define FLOATING_VAL_ERR L"[Frame Error -3] Tried to add value without giving a parameter name"
 
-#define EMPTY_BG         -4
-#define EMPTY_BG_ERR     std::wstring(L"[Frame Error -4] No background image file given")
-#define BAD_BG           -5
-#define BAD_BG_ERR       std::wstring(L"[Frame Error -5] Background image file of unsupported type")
+#define EMPTY_FILE       -4
+#define EMPTY_FILE_ERR_1 L"[Frame Error -4] No file name given for map["
+#define EMPTY_FILE_ERR_2 L"]"
 
-#define EMPTY_BGM        -6
-#define EMPTY_BGM_ERR    std::wstring(L"[Frame Error -6] No BGM file given")
-#define BAD_BGM          -7
-#define BAD_BGM_ERR      std::wstring(L"[Frame Error -7] BGM file of unsupported type")
+#define BAD_FILE         -5
+#define BAD_FILE_ERR_1   L"[Frame Error -5] Unsupported file given for map["
+#define BAD_FILE_ERR_2   L"], "
 
-#define EMPTY_SFX        -8
-#define EMPTY_SFX_ERR    std::wstring(L"[Frame Error -8] No sound effect file given")
-#define BAD_SFX          -9
-#define BAD_SFX_ERR      std::wstring(L"[Frame Error -9] Sound effect file of unsupported type")
-
-#define EMPTY_SPRITE     -10
-#define EMPTY_SPRITE_ERR std::wstring(L"[Frame Error -10] No sprite file given")
-#define BAD_SPRITE       -11
-#define BAD_SPRITE_ERR   std::wstring(L"[Frame Error -11] Sprite file of unsupported type")
-
-#define CANNOT_FRZ       -12
-#define CANNOT_FRZ_ERR   std::wstring(L"[Frame Error -12] No content to freeze")
-#define FRZ_EMPTY        -13
-#define FRZ_EMPTY_ERR    std::wstring(L"[Frame Error -13] Unable to unfreeze component; no frozen content found")
+#define CANNOT_FRZ       -6
+#define CANNOT_FRZ_ERR   L"[Frame Error -12] No content to freeze"
+#define FRZ_EMPTY        -7
+#define FRZ_EMPTY_ERR    L"[Frame Error -13] Unable to unfreeze component; no frozen content found"
 
 
 /* Control functions */
@@ -113,7 +102,8 @@ class Frame : public Container
 						std::wstring filename = params[i].second;
 						if(filename.length() > 0)
 						{
-							for(int i = 0; i < supported.size(); i++){
+							for(int i = 0; i < supported.size(); i++)
+							{
 								if( filename.compare( filename.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 								{
 									this->mod[p].second.push_back(filename);
@@ -122,10 +112,12 @@ class Frame : public Container
 							}
 							
 							// Unsupported type error
+							this->err.push_back(std::make_pair(BAD_FILE, BAD_FILE_ERR_1 + p + BAD_FILE_ERR_2 + filename));
 						}
 						else
 						{
 							// Empty string error
+							this->err.push_back(std::make_pair(EMPTY_FILE, EMPTY_FILE_ERR_1 + p + EMPTY_FILE_ERR_2));
 						}
 					}
 					else
@@ -143,7 +135,7 @@ class Frame : public Container
 			
 			return params.size() - 1;
 		};
-		
+			
 		// Freeze content and return how many things are frozen
 		unsigned int freeze()
 		{

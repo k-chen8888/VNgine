@@ -23,9 +23,14 @@
 
 
 // Macros for default files
-#define DEFAULT_BG  L"blackscreen.jpg"
-#define DEFAULT_BGM L"defaultsong.mp3"
-#define DEFAULT_SFX L"defaultsound.mp3"
+#define DEFAULT_BG     L"blackscreen.jpg"
+#define DEFAULT_BGM    L"defaultsong.mp3"
+#define DEFAULT_SFX    L"defaultsound.mp3"
+
+
+// Macros for freeze/unfreeze keywords
+#define FREEZE         L"freeze"
+#define UNFREEZE       L"unfreeze"
 
 
 // Definitions for the type of delimiter found at each position

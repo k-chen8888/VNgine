@@ -6,6 +6,12 @@
 #include "keywords.h"
 
 
+/* Control functions */
+
+// Add parameters to a VNObject
+unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params);
+
+
 /* Abstract class for a visual novel object inside a component
  */
 class VNObject
@@ -13,6 +19,10 @@ class VNObject
 	protected:
 		// Modifier map (keywords -> integers)
 		std::map<std::wstring, int> mod;
+		
+		// Traversal
+		int freeze = -1;                       // A jump to the next Component if > -1
+		int end = -1;                          // A jump to the next Component if > -1
 		
 		// Error messages
 		std::vector<std::wstring> err;
@@ -27,6 +37,20 @@ class VNObject
 		// Fill in parameters
 		virtual unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params) = 0;
 		
+		// Set a freeze point
+		void setFreeze(int next)
+		{
+			if(next > -1)
+				this->freeze = next;
+		}
+		
+		// Set an end point
+		void setEnd(int next)
+		{
+			if(next > -1)
+				this->end = next;
+		}
+		
 		/* Playback */
 		
 		// Play the VNObject
@@ -34,7 +58,7 @@ class VNObject
 		virtual int play(bool gui) = 0;
 		
 		/* Reporting */
-		/*
+		
 		// Is there a freeze after this VNObject?
 		bool isFreeze()
 		{
@@ -46,7 +70,6 @@ class VNObject
 		{
 			return this->end > -1;
 		};
-		*/
 };
 
 

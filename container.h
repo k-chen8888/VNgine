@@ -79,10 +79,10 @@ class Container
 			}
 		};
 		
-		// Freeze content
+		// Freeze current content element
 		virtual unsigned int freeze() = 0;
 		
-		// Unfreeze content
+		// Unfreeze last frozen content element
 		virtual unsigned int unfreeze() = 0;
 		
 		/* Playback */
@@ -136,10 +136,13 @@ class Container
 			return this->contents.size();
 		};
 		
-		// Get index of the last frozen content element
-		unsigned int lastFrz()
+		// Get frozen content element at some index
+		Component* getFrz(unsigned int i)
 		{
-			return this->frz.back();
+			if(i < this->frz.size())
+				return this->frz[i];
+			else
+				return NULL;
 		}
 		
 		// Get current number of frozen content elements

@@ -20,11 +20,8 @@ class Component
 		std::map<std::wstring, int> mod;
 		
 		// Traversal
-		int previous;                          // Previously edited position (editing only)
 		unsigned int current;                  // Current position being played/edited
 		std::vector<VNObject*> contents;       // Stuff inside this Component
-		unsigned int ending;                   // Index of the ending that will be reached next
-		std::vector<std::pair<int, int>> next; // Index of the next Container to play (the final element in the queue is the true "end" of the Container)
 		
 		// Error messages
 		std::vector< std::pair<int, std::wstring> > err;
@@ -63,16 +60,6 @@ class Component
 				{
 					this->next[this->next.size() - 1].second = n;
 				}
-			}
-		};
-		
-		// Deactivate a content element
-		void deactivateContent()
-		{
-			if(this->current < this->contents.size() - 1)
-			{
-				this->previous = this->current;
-				this->current = this->contents.size();
 			}
 		};
 		

@@ -3,6 +3,7 @@
 
 
 // Base files
+#include "keywords.h"
 #include "vnovel.h"
 #include "container.h"
 #include "component.h"
@@ -60,8 +61,9 @@ class TextBox : public Component
 			this->index = loc;
 			
 			// Default editing/traversal parameters
-			this->previous = -1;
 			this->current = 0;
+			this->freeze = -1;
+			this->end = -1;
 			
 			// Add modifiers to map
 			
