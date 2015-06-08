@@ -11,16 +11,13 @@
 #include <fcntl.h>
 
 // Base files
-#include "vn_global.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
 
 // Class header
 #include "textbox.h"
-
-// Visual Novel
-#include "vnovel.h"
 
 // Namespaces
 using namespace std;
@@ -29,7 +26,7 @@ using namespace std;
 /* Control functions */
 
 // Create a TextBox
-unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+unsigned int makeTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
 {
 	unsigned int out = start;
 	Container* cont = vn->getActiveCont();
@@ -66,7 +63,7 @@ unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<i
 };
 
 // End a TextBox
-unsigned int endTextBox(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
+unsigned int endTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
 {
 	Container* cont = vn->getActiveCont();
 	Component* c;

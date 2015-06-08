@@ -2,10 +2,8 @@
 #define VNOBJECT_H
 
 
-/* Control functions */
-
-// Add parameters to a VNObject
-unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+// Base files
+#include "keywords.h"
 
 
 /* Abstract class for a visual novel object inside a component
@@ -27,7 +25,7 @@ class VNObject
 		/* Build and edit */
 		
 		// Fill in parameters
-		virtual unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
+		virtual unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params) = 0;
 		
 		/* Playback */
 		
@@ -36,7 +34,7 @@ class VNObject
 		virtual int play(bool gui) = 0;
 		
 		/* Reporting */
-		
+		/*
 		// Is there a freeze after this VNObject?
 		bool isFreeze()
 		{
@@ -48,6 +46,7 @@ class VNObject
 		{
 			return this->end > -1;
 		};
+		*/
 };
 
 

@@ -3,7 +3,7 @@
 
 
 // Base files
-#include "vn_global.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
@@ -49,68 +49,32 @@
 #define FRZ_EMPTY_ERR    std::wstring(L"[Frame Error -13] Unable to unfreeze component; no frozen content found")
 
 
-// typedef for control functions
-void (*addObj)(Frame*, std::wstring);
-
-
 /* Control functions */
 
 // Create a Frame
-unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
-
-// Add a background image
-void addBG(Frame* f, std::wstring bgfile);
-
-// Add a bgm file
-void addBGM(Frame* f, std::wstring bgmfile);
-
-// Add a sound effect file
-void addSFX(Frame* f, std::wstring sfxfile);
-
-// Add a sprite image file
-void addSprite(Frame* f, std::wstring spritefile);
+unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params);
 
 // End a Frame, closing out all frozen and active Components
-unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params);
+unsigned int endFrame(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params);
 
 
 /************************************************
  * Visual Novel Frame
  * Container-type VN component (holds objects of type Component)
  ************************************************/
-template <>
-class Frame : public Container<Component>
+class Frame : public Container
 {
 	private:
 		// Map that defines all possible frame parameters and provides a way to add and store them
-		std::map<std::wstring, std::pair<std::vector<std::wstring>, addObj>> mod;
+		// wstring -> pair (supported types, file names)
+		std::map< std::wstring, std::pair< std::vector<std::wstring>, std::vector<std::wstring> > > mod;
 		
 		// Private default constructor
 		Frame() { }
 	
 	public:
 		/* Constructor */
-		Frame(std::wstring n, int i)
-		{
-			//Set unicode input/output
-			setUnicode(true, true);
-			
-			// Set identifiers
-			this->type = L"Frame";
-			this->name = n;
-			this->index = i;
-			
-			// Add frame object holders to map
-			this->mod[L"bg"].second = &addBG;         // Background image files
-			this->mod[L"bgm"].second = &addBGM;       // Background music files
-			this->mod[L"sfx"].second = &addSFX;       // Sound effects files
-			this->mod[L"sprite"].second = &addSprite; // Sprite image files
-			
-			// Default editing/traversal parameters
-			this->previous = -1;
-			this->current = 0;
-			this->ending = 0;
-		};
+		Frame(std::wstring n, int i);
 		
 		/*******************************************
 		 * Functions
@@ -119,9 +83,9 @@ class Frame : public Container<Component>
 		/* Build and edit */
 		
 		// Fill in parameters
-		unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+		unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 		{
-			wstring p = L"";
+			std::wstring p = L"";
 			
 			// Go through parameters and fill in data
 			for(int i = start; i < params.size(); i++)
@@ -142,7 +106,27 @@ class Frame : public Container<Component>
 				{
 					if(p.length() > 0)
 					{
-						this->mod[p](this, params[i].second);
+						// Grab supported file types
+						std::vector<std::wstring> supported = this->mod[p].first;
+						
+						// Attempt to add new file to list
+						std::wstring filename = params[i].second;
+						if(filename.length() > 0)
+						{
+							for(int i = 0; i < supported.size(); i++){
+								if( filename.compare( filename.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
+								{
+									this->mod[p].second.push_back(filename);
+									return 0;
+								}
+							}
+							
+							// Unsupported type error
+						}
+						else
+						{
+							// Empty string error
+						}
 					}
 					else
 					{
@@ -160,119 +144,13 @@ class Frame : public Container<Component>
 			return params.size() - 1;
 		};
 		
-		// Add a background image
-		int addBG(std::wstring bgfile)
-		{
-			std::wstring types[] = {L".jpg", L".png", L".gif"};
-			std::vector<std::wstring> supported(types, types + 3);
-			
-			if(bgfile.length() > 0)
-			{
-				for(int i = 0; i < supported.size(); i++){
-					if( bgfile.compare( bgfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
-					{
-						this->obj[L"bg"].first.push_back(bgfile);
-						return 0;
-					}
-				}
-				
-				// Unsupported type error
-				this->err.push_back(std::make_pair(BAD_BG, BAD_BG_ERR + L" (" + bgfile + L")");
-				return BAD_BG;
-			}
-			else // Empty string error
-			{
-				this->err.push_back(std::make_pair(EMPTY_BG, EMPTY_BG_ERR));
-				return EMPTY_BG;
-			}
-		};
-		
-		// Add a bgm file
-		int addBGM(std::wstring bgmfile)
-		{
-			std::wstring types[] = {L".mp3", L".wav"};
-			std::vector<std::wstring> supported(types, types + 2);
-			
-			if(bgmfile.length() > 0)
-			{
-				for(int i = 0; i < supported.size(); i++){
-					if( bgmfile.compare( bgmfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
-					{
-						this->obj[L"bgm"].first.push_back(bgmfile);
-						return 0;
-					}
-				}
-				
-				// Unsupported type error
-				this->err.push_back(std::make_pair(BAD_BGM, BAD_BGM_ERR + L" (" + bgmfile + L")"));
-				return BAD_BGM;
-			}
-			else // Empty string error
-			{
-				this->err.push_back(std::make_pair(EMPTY_BGM, EMPTY_BGM_ERR));
-				return EMPTY_BGM;
-			}
-		};
-		
-		// Add a sound effect file
-		int addSFX(std::wstring sfxfile);
-		{
-			std::wstring types[] = {L".mp3", L".wav"};
-			std::vector<std::wstring> supported(types, types + 2);
-			
-			if(sfxfile.length() > 0)
-			{
-				for(int i = 0; i < supported.size(); i++){
-					if( sfxfile.compare( sfxfile.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
-					{
-						this->obj[L"sfx"].first.push_back(sfxfile);
-						return 0;
-					}
-				}
-				
-				// Unsupported type error
-				this->err.push_back(std::make_pair(BAD_SFX, BAD_SFX_ERR + L" (" + sfxfile + L")"));
-				return BAD_SFX;
-			}
-			else // Empty string error
-			{
-				this->err.push_back(std::make_pair(EMPTY_SFX, EMPTY_SFX_ERR));
-				return EMPTY_SFX;
-			}
-		};
-		
-		// Add a sprite image file
-		int addSprite(std::wstring spritefile)
-		{
-			wstring supported(L".png");
-			
-			if(spritefile.length() > 0)
-			{
-				if( spritefile.compare( spritefile.length() - 4, 4, supported ) == 0 ) // Found a supported type
-				{
-					this->obj[L"sprite"].first.push_back(spritefile);
-					return 0;
-				}
-				else
-				{
-					this->err.push_back(std::make_pair(BAD_SPRITE, BAD_SPRITE_ERR + L" (" + spritefile + L")"));
-					return BAD_SPRITE; // Unsupported type error
-				}
-			}
-			else // Empty string error
-			{
-				this->err.push_back(std::make_pair(EMPTY_SPRITE, EMPTY_SPRITE_ERR));
-				return EMPTY_SPRITE;
-			}
-		};
-		
 		// Freeze content and return how many things are frozen
 		unsigned int freeze()
 		{
 			if(this->current < this->contents.size())
 			{
 				this->frz.push_back(this->current);
-				this->deactivateComp();
+				this->deactivateContent();
 			}
 			else
 			{
@@ -295,7 +173,7 @@ class Frame : public Container<Component>
 				{
 					// Reactivate frozen component
 					this->current = this->frz.back();
-					this->frozen.pop_back();
+					this->frz.pop_back();
 				}
 			}
 			else
@@ -312,7 +190,7 @@ class Frame : public Container<Component>
 		// Output the index of the next Frame to jump to
 		int play(bool gui)
 		{
-			while(this->current < this->contents.size()
+			while(this->current < this->contents.size())
 			{
 				this->current = this->contents[this->current]->play(gui);
 			}

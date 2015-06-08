@@ -11,16 +11,13 @@
 #include <fcntl.h>
 
 // Base files
-#include "vn_global.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
 
 // Class header
 #include "text.h"
-
-// Visual Novel
-#include "vnovel.h"
 
 // Namespaces
 using namespace std;
@@ -29,12 +26,12 @@ using namespace std;
 /* Control functions */
 
 // Create a Text object
-unsigned int makeText(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
 	unsigned int out = start;
-	Container* cont = vn->getActiveCont();
+	Container* cont = vn->getContAt(vn->getCurr());
 	Component* comp;
-	Text* t;
+	Text* text;
 	VNObject* v;
 	
 	// Check if there is a Container to store this VNObject inside
@@ -45,22 +42,22 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector<std::pair<int,
 	}
 	
 	// Check if there is a Component to store this VNObject in
-	c = last_cont->getContentAt(last_cont->getCurrent());
-	if(c == NULL)
+	comp = cont->getContentAt(cont->getCurrent());
+	if(comp == NULL)
 	{
 		wcout << L"No active Component to store this VNObject inside";
 		return start;
 	}
 	
 	// Create the VNObject
-	t = new Text(L"");
-	v = t;
+	text = new Text(L"");
+	v = text;
 	
 	// Set parameters if there are any
 	out = v->setData(out, params);
 	
 	// Add this VNObject to the component
-	c->addObj(v);
+	comp->addObj(v);
 	
 	// End
 	return out;

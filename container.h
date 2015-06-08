@@ -3,42 +3,32 @@
 
 
 // Base files
-#include "vn_global.h"
-#include "container.h"
+#include "keywords.h"
+#include "vnovel.h"
 #include "component.h"
 #include "vnobject.h"
 
 
-/* Control functions */
-
-// Add parameters to a Container
-unsigned int setContParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
-
-// Ignores comments
-unsigned int ignoreComments(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
-
-
 /* Abstract class for a visual novel component container
  */
-template <typename T>
 class Container
 {
 	protected:
 		// Identifying information
-		std::wstring type;                     // Class name
-		std::wstring name;                     // Name
-		int index;                             // Index in list
+		std::wstring type;                       // Class name
+		std::wstring name;                       // Name
+		int index;                               // Index in list
 		
 		// Traversal
-		int previous;                          // Previously edited position (editing only)
-		unsigned int current;                  // Current position being played/edited
-		std::vector<T*> contents;              // Stuff inside this Container
-		std::vector<unsigned int> frz;         // Stack of frozen indices (editing only)
-		unsigned int ending;                   // Index of the ending that will be reached next
-		std::vector<std::pair<int, int>> next; // Index of the next Container to play (the final element in the queue is the true "end" of the Container)
+		int previous;                            // Previously edited position (editing only)
+		unsigned int current;                    // Current position being played/edited
+		std::vector<Component*> contents;        // Stuff inside this Container
+		std::vector<unsigned int> frz;           // Stack of frozen indices (editing only)
+		unsigned int ending;                     // Index of the ending that will be reached next
+		std::vector< std::pair<int, int> > next; // Index of the next Container to play (the final element in the queue is the true "end" of the Container)
 		
 		// Error messages
-		std::vector<std::pair<int, std::wstring>> err;
+		std::vector< std::pair<int, std::wstring> > err;
 	
 	public:
 		/*******************************************
@@ -48,7 +38,7 @@ class Container
 		/* Build and edit */
 		
 		// Fill in parameters
-		virtual unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
+		virtual unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params) = 0;
 		
 		// Tell this Container where to stop and where to go next
 		// -1 implies that there is nothing left to jump to
@@ -71,7 +61,7 @@ class Container
 		};
 		
 		// Set content as active for editing
-		void addActive(T* c)
+		void addActive(Component* c)
 		{
 			if(c != NULL)
 			{
@@ -132,7 +122,7 @@ class Container
 		};
 		
 		// Retrieve a content element at some index
-		T* getContentAt(unsigned int index)
+		Component* getContentAt(unsigned int index)
 		{
 			if(index < this->contents.size())
 				return this->contents[index];

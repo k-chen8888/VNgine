@@ -2,10 +2,9 @@
 #define COMPONENT_H
 
 
-/* Control functions */
-
-// Add parameters to a Component
-unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+// Base files
+#include "keywords.h"
+#include "vnobject.h"
 
 
 /* Abstract class for a visual novel component
@@ -14,8 +13,8 @@ class Component
 {
 	protected:
 		// Identifying information
-		std::wstring type;               // Class name
-		unsigned int index;              // Index in list
+		std::wstring type;                     // Class name
+		unsigned int index;                    // Index in list
 		
 		// Modifier map (keywords -> integers)
 		std::map<std::wstring, int> mod;
@@ -28,7 +27,7 @@ class Component
 		std::vector<std::pair<int, int>> next; // Index of the next Container to play (the final element in the queue is the true "end" of the Container)
 		
 		// Error messages
-		std::vector<std::wstring> err;
+		std::vector< std::pair<int, std::wstring> > err;
 	
 	public:
 		/*******************************************
@@ -38,7 +37,7 @@ class Component
 		/* Build and edit */
 		
 		// Fill in parameters
-		virtual unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params) = 0;
+		virtual unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params) = 0;
 		
 		// Add a VNObject
 		void addObj(VNObject* v)

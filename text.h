@@ -3,16 +3,14 @@
 
 
 // Base files
-#include "vn_global.h"
-#include "container.h"
-#include "component.h"
+#include "vnovel.h"
 #include "vnobject.h"
 
 
 /* Control functions */
 
 // Create a Text object
-unsigned int makeText(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params);
 
 // End a Text object... there's no function for this because Text objects are implicitly ended
 
@@ -78,7 +76,7 @@ class TextBox : public VNObject
 		/* Build and edit */
 		
 		// Fill in parameters
-		unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+		unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 		{
 			for(int i = start; i < params.size(); i++)
 			{

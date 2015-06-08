@@ -16,9 +16,6 @@
 #include "component.h"
 #include "vnobject.h"
 
-// Namespaces
-using namespace std;
-
 
 /* Control functions */
 
@@ -44,17 +41,17 @@ unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector< std::pair
 			}
 			else
 			{
-				wcout << L"No VNObjects to set parameters for";
+				std::wcout << L"No VNObjects to set parameters for";
 			}
 		}
 		else
 		{
-			wcout << L"No Component; therefore, no VNObject to store parameters in";
+			std::wcout << L"No Component; therefore, no VNObject to store parameters in";
 		}
 	}
 	else
 	{
-		wcout << L"No Container; therefore, no VNObject to store parameters in";
+		std::wcout << L"No Container; therefore, no VNObject to store parameters in";
 	}
 	
 	return params.size() - 1;

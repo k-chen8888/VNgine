@@ -3,7 +3,7 @@
 
 
 // Base files
-#include "vn_global.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
@@ -32,10 +32,10 @@
 /* Control functions */
 
 // Create a TextBox
-unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params);
+unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params);
 
 // End a TextBox, closing out all frozen and active VNObjects
-unsigned int endTextBox(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params);
+unsigned int endTextBox(VNovel* vn, unsigned int start,  std::vector< std::pair<int,  std::wstring> > params);
 
 
 /************************************************
@@ -62,7 +62,6 @@ class TextBox : public Component
 			// Default editing/traversal parameters
 			this->previous = -1;
 			this->current = 0;
-			this->end = 0;
 			
 			// Add modifiers to map
 			
@@ -83,7 +82,7 @@ class TextBox : public Component
 		/* Build and edit */
 		
 		// Fill in parameters
-		unsigned int setData(unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+		unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 		{
 			for(int i = start; i < params.size(); i++)
 			{
@@ -121,7 +120,7 @@ class TextBox : public Component
 						break;
 					
 					// Floating parameter value delimiter (skip)
-					case COMP_PARAM:
+					case PARAM_VAL:
 						this->err.push_back(std::make_pair(FLOATING_VAL, FLOATING_VAL_ERR));
 						break;
 					

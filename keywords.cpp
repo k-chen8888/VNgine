@@ -11,7 +11,7 @@
 #include <fcntl.h>
 
 // Base files
-#include "vn_global.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
@@ -20,8 +20,6 @@
 #include "keywords.h"
 
 // Parts of the Visual Novel
-#include "vnovel.h"
-
 #include "frame.h"
 
 #include "textbox.h"

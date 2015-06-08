@@ -11,16 +11,13 @@
 #include <fcntl.h>
 
 // Base files
-#include "vn_global.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
 
 // Class header
 #include "frame.h"
-
-// Visual Novel
-#include "vnovel.h"
 
 // Namespaces
 using namespace std;
@@ -29,7 +26,7 @@ using namespace std;
 /* Control functions */
 
 // Create a Frame
-unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+unsigned int makeFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
 {
 	unsigned int out = start;
 	Frame* f;
@@ -65,55 +62,27 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector<std::pair<int
 	return out;
 };
 
-// Add a background image
-void addBGToFrame(Container* f, std::wstring bgfile)
-{
-	int err = f->addBG(bgfile);
-	if(err < 0)
-		wcout << L"'" << bgfile << L"' threw error code " << err;
-};
-
-// Add a bgm file
-void addBGMToFrame(Container* f, std::wstring bgmfile)
-{
-	int err = f->addBGM(bgmfile);
-	if(err < 0)
-		wcout << L"'" << bgmfile << L"' threw error code " << err;
-};
-
-// Add a sound effect file
-void addSFXToFrame(Container* f, std::wstring sfxfile)
-{
-	int err = f->addSFX(sfxfile);
-	if(err < 0)
-		wcout << L"'" << sfxfile << L"' threw error code " << err;
-};
-
-// Add a sprite image file
-void addSpriteToFrame(Container* f, std::wstring spritefile)
-{
-	int err = f->addSprite(spritefile);
-	if(err < 0)
-		wcout << L"'" << spritefile << L"' threw error code " << err;
-};
-
 // End a Frame, closing out all frozen and active content
-unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>> params)
+unsigned int endFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
 {
-	Container* curr_frame = vn->getActiveCont();
+	Container* curr_frame;
 	
 	// End the last existing Frame for good
-	if(curr_frame != NULL)
+	if(vn->getContAt(vn->getCurr()) != NULL)
 	{
 		// Cannot handle things that aren't Frames, so return -1 + params.size() - 1
-		if(curr_frame->getType().compare(L"Frame") != 0)
+		if(vn->getContAt(vn->getCurr())->getType().compare(L"Frame") == 0)
+		{
+			curr_frame = vn->getContAt(vn->getCurr());
+		}
+		else
 		{
 			wcout << L"Open Container is not a Frame";
 			return params.size() - 2;
 		}
 		
 		// Cannot close Frame if there is still something frozen or active, so return -1 + params.size() - 1
-		if(curr_frame->lastFrozen() != NULL)
+		if(curr_frame->numFrozen() > 0)
 		{
 			wcout << L"Cannot close Frame if there is still something frozen";
 			return params.size() - 2;
@@ -131,4 +100,45 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector<pair<int, wstring>>
 	
 	// On end, ignore the rest of params
 	return params.size() - 1;
+};
+
+
+// Class constructor
+Frame::Frame(std::wstring n, int i)
+{
+	//Set unicode input/output
+	setUnicode(true, true);
+	
+	// Set identifiers
+	this->type = L"Frame";
+	this->name = n;
+	this->index = i;
+	
+	// Add frame object holders to map
+	vector<wstring> vbg;
+	vector<wstring> vbgm;
+	vector<wstring> vsfx;
+	vector<wstring> vsprites;
+	
+	std::wstring types_bg[] = {L".jpg", L".png", L".gif"};
+	std::vector<std::wstring> supported_bg(types_bg, types_bg + 3);
+	
+	std::wstring types_bgm[] = {L".mp3", L".wav"};
+	std::vector<std::wstring> supported_bgm(types_bgm, types_bgm + 2);
+	
+	std::wstring types_sfx[] = {L".mp3", L".wav"};
+	std::vector<std::wstring> supported_sfx(types_sfx, types_sfx + 2);
+	
+	std::wstring types_sprites[] = {L".png"};
+	std::vector<std::wstring> supported_sprites(types_sprites, types_sprites + 1);
+	
+	this->mod.insert( make_pair( L"bg", make_pair(supported_bg, vbg ) ) );                // Background image files
+	this->mod.insert( make_pair( L"bgm", make_pair( supported_bgm, vbgm ) ) );            // Background music files
+	this->mod.insert( make_pair( L"sfx", make_pair( supported_sfx, vsfx ) ) );            // Sound effects files
+	this->mod.insert( make_pair( L"sprite", make_pair( supported_sprites, vsprites ) ) ); // Sprite image files
+	
+	// Default editing/traversal parameters
+	this->previous = -1;
+	this->current = 0;
+	this->ending = 0;
 };

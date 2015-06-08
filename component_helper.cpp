@@ -11,22 +11,18 @@
 #include <fcntl.h>
 
 // Base files
-#include "vn_global.h"
+#include "keywords.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
 
-// Visual Novel
-#include "vnovel.h"
-
-// Namespaces
-using namespace std;
 
 
 /* Control functions */
 
 // Add parameters to a Component
-unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair<int, std::wstring>> params)
+unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
 	Container* cont = vn->getActiveCont();
 	Component* c;
@@ -43,12 +39,12 @@ unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector<std::pair
 		}
 		else
 		{
-			wcout << L"No Component to store parameters in";
+			std::wcout << L"No Component to store parameters in";
 		}
 	}
 	else
 	{
-		wcout << L"No Container; therefore, no place to store Component parameters";
+		std::wcout << L"No Container; therefore, no place to store Component parameters";
 	}
 	
 	return params.size() - 1;

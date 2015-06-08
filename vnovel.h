@@ -2,24 +2,28 @@
 #define VNOVEL_H
 
 
+/* Imports */
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+
+// Locale tools
+#include <locale>
+#include <stdio.h>
+#include <fcntl.h>
+
+
 // Base files
-#include "vn_global.h"
+#include "keywords.h"
+#include "vnovel.h"
 #include "container.h"
 #include "component.h"
 #include "vnobject.h"
 
 
-// Parts of the Visual Novel
-#include "vnovel.h"
-
-#include "frame.h"
-
-#include "textbox.h"
-
-#include "text.h"
-
-
-// Error macros
+// Macros for VNovel error messages
 #define NO_CONT_ERR     std::wstring(L"No Container to store parameter values")
 #define NO_CONT         -2
 
@@ -46,8 +50,7 @@
 class VNovel
 {
 	private:
-		std::wstring source;           // Script file to build VN from
-		std::vector<wchar_t> ignore;   // Clean these out of the front and back of stored strings
+		std::string source;            // Script file to build VN from
 		
 		std::vector<Container*> cont;  // VN components, stored in Container objects
 		int prev;                      // Index of previous Container in vector (editing only)
@@ -60,23 +63,7 @@ class VNovel
 	
 	public:
 		/* Constructor */
-		VNovel(std::wstring src)
-		{
-			this->source = src;
-			this->prev = -1;
-			this->curr = 0;
-			
-			//Set unicode input/output
-			int e = setUnicode(true, true);
-			if(e == SET_IN)
-			{
-				this->err.push_back(SET_IN_ERR);
-			}
-			if(e == SET_OUT)
-			{
-				this->err.push_back(SET_OUT_ERR);
-			}
-		};
+		VNovel(std::string src);
 		
 		/*******************************************
 		 * Functions
@@ -85,169 +72,7 @@ class VNovel
 		/* Build a Visual Novel */
 		
 		// Builds VN from script file
-		int buildVN()
-		{
-			wifstream ifile;
-			try
-			{
-				ifile.open(this->source);
-			}
-			catch(int e)
-			{
-				return e; // Failure
-			}
-			
-			wstring line;
-			unsigned int lcount;
-			while( getline(ifile, line) )
-			{
-				// PDA
-				PDA<wstring> script (line, this->delim);
-				
-				// Map lookup keywords
-				vector<pair<int, wstring>> kwlist;
-				
-				// Start position of current token
-				unsigned int start;
-				
-				// Locations of escape characters
-				vector<unsigned int> esc;
-				
-				// Pull out and process the tokens
-				while(script.getPos() < line.length() && script.getErr() > -1)
-				{
-					string token = script.readNext();
-					int d = script.lastDelim();
-					
-					if(script.getErr() < -1)
-					{
-						this->err.push_back( L"[Error:L" + to_wstring(lcount) + L"] Improper formatting\n" );
-					}
-					else // Found a token?
-					{
-						if(token.length() > 0)
-						{
-							// Check if tokens can be added when a new opening delimiter is pushed
-							if(d > 0)
-							{
-								// Check if the token is meaningful (enclosed in delimiters)
-								if(script.lastRemoved() > 0)
-								{
-									// Create the final token and add it to the list
-									wstring finaltoken = escape(token, esc);
-									if(script.lastRemoved() != TXT_TOKEN)
-										finaltoken = strip(finaltoken);
-									
-									kwlist.push_back( make_pair( script.lastRemoved(), finaltoken ) );
-									start = script.getPos();
-								}
-							}
-							
-							// Flush stack when the sequence ends
-							bool outofkw = script.stackDepth() == 0 && kwlist.size() > 0;
-							bool endofline = script.getPos() >= line.length();
-							if( outofkw || endofline )
-							{
-								unsigned int s = 0;
-								while(s < kwlist.size())
-								{
-									// Switch on the delimiter type
-									switch( kwlist[0].first )
-									{
-										// Container
-										case CONT_OPEN:
-											s = containers[ kwlist[0].second ](this, 1, kwlist);
-											break;
-										
-										// Container parameter
-										case CONT_PARAM:
-											// Attempt to add Container parameters
-											s = containers[ L"cont_param" ](this, 0, kwlist);
-											
-											// Returns the length of params on error
-											if(s == params.size())
-											{
-												this->err.push_back(NO_CONT_ERR);
-												return NO_CONT;
-											}
-											
-											break;
-										
-										// Component
-										case COMP_OPEN:
-											s = components[ kwlist[0].second ](this, 1, kwlist);
-											break;
-										
-										// Component parameter
-										case COMP_PARAM:
-											// Attempt to add Component parameters
-											s = components[ L"comp_param" ](this, 0, kwlist);
-											
-											// Returns the length of params on error
-											if(s == params.size())
-											{
-												this->err.push_back(NO_COMP_ERR);
-												return NO_COMP;
-											}
-											
-											break;
-										
-										// VNObject
-										case OBJ_OPEN:
-											s = vnobjects[ kwlist[0].second ](this, 1, kwlist);
-											break;
-										
-										// VNObject parameter
-										case OBJ_PARAM:
-											// Attempt to add Component parameters
-											s = vnobjects[ L"obj_param" ](this, 0, kwlist);
-											
-											// Returns the length of params on error
-											if(s == params.size())
-											{
-												this->err.push_back(NO_OBJ_ERR);
-												return NO_OBJ;
-											}
-											
-											break;
-										
-										// Parameter value (misplaced)
-										case PARAM_VAL:
-											this->err.push_back(LOOSE_PARAM_ERR);
-											return LOOSE_PARAM;
-										
-										// Text token (misplaced)
-										case TXT_TOKEN:
-											this->err.push_back(LOOSE_TXT_ERR);
-											return TXT_PARAM;
-										
-										// Everything else
-										default:
-											break;
-									}
-									
-									s += 1;
-								}
-								
-								// No more keywords
-								kwlist.clear();
-							}
-						}
-						else
-						{
-							if(script.isEsc()) // Mark escape characters
-								esc.push_back(script.getPos() - tstart);
-						}
-					}
-				}
-				
-				lcount += 1;
-			}
-			
-			ifile.close();
-			
-			return 0;
-		};
+		int buildVN();
 		
 		// Add Container to the list
 		void addCont(Container* c)
@@ -303,8 +128,8 @@ class VNovel
 		// Display all error messages
 		int reportErrors()
 		{
-			for(int i = 0; i < this->err.length(); i++)
-				wcout << this->err[i] << "\n";
+			for(int i = 0; i < this->err.size(); i++)
+				std::wcout << this->err[i] << "\n";
 			
 			return 0;
 		};
@@ -318,6 +143,55 @@ class VNovel
 			}
 		};
 };
+
+
+/* typedef for generic function used to create/modify any component
+ * Used to define type of function in keyword map
+ * 
+ * Arguments:
+ * 	1. Visual Novel object
+ * 	2. Place in parameter list to start looking
+ * 	3. Other arguments (properties followed by saved data token; parameter list)
+ * 
+ * Output: Position where function stopped reading arguments (1 before the next argument to be read)
+ */
+typedef unsigned int (*buildF)(VNovel*, unsigned int, std::vector< std::pair<int, std::wstring> >);
+
+
+/* Global variables and special definitions */
+
+// Keyword maps
+extern std::map<std::wstring, buildF> containers;
+extern std::map<std::wstring, buildF> components;
+extern std::map<std::wstring, buildF> vnobjects;
+
+// Delimiter vector
+extern wchar_t d[];
+extern std::vector<wchar_t> delim;
+
+// Ignored characters
+extern wchar_t i[];
+extern std::vector<wchar_t> ign;
+
+
+/* Editing tools and helper functions */
+
+// Add elements to keyword maps
+int addToContainers(std::wstring kw, buildF b);
+int addToComponents(std::wstring kw, buildF b);
+int addToVNObjects(std::wstring kw, buildF b);
+
+// Removes escape characters
+std::wstring escape(std::wstring token, std::vector<unsigned int> e);
+
+// Strips ignored characters
+std::wstring strip(std::wstring token);
+
+// String to integer
+int toInt(std::wstring s);
+
+//Set unicode input/output
+int setUnicode(bool in, bool out);
 
 
 #endif
