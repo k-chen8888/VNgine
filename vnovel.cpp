@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+// Libraries for "Press ENTER to continue..."
+#include <limits>
+
 // Base files
 #include "keywords.h"
 #include "vnovel.h"
@@ -339,6 +342,13 @@ int setUnicode(bool in, bool out)
 	}
 	
 	return 0;
+};
+
+// "Press ENTER to continue..."
+void enterToContinue()
+{
+	std::wcout << "\nPress ENTER to continue...\n";
+	std::wcin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );	
 };
 
 

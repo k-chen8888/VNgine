@@ -193,5 +193,8 @@ int toInt(std::wstring s);
 //Set unicode input/output
 int setUnicode(bool in, bool out);
 
+// "Press ENTER to continue..."
+void enterToContinue();
+
 
 #endif

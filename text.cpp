@@ -11,6 +11,7 @@
 #include <fcntl.h>
 
 // Base files
+#include "keywords.h"
 #include "vnovel.h"
 #include "container.h"
 #include "component.h"
@@ -56,13 +57,18 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int
 	v = text;
 	
 	// Set parameters if there are any
-	while(params[i].first > OBJ_OPEN)
+	while(out < params.size() && params[out].first > OBJ_OPEN)
 	{
-		out = v->setData(out, params);
-		
 		// Handle keyword 'freeze'
-		if(params[i].first == PARAM_VAL && params[i].second.compare(FREEZE) == 0)
+		if(params[out].first == PARAM_VAL && params[out].second.compare(FREEZE) == 0)
+		{
+			out += 1;
 			frz = true;
+		}
+		else
+		{
+			out = v->setData(out, params);
+		}
 	}
 	
 	// Add this VNObject to the component

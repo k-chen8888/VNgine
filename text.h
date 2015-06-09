@@ -1,5 +1,5 @@
-#ifndef TEXTBOX_H
-#define TEXTBOX_H
+#ifndef TEXT_H
+#define TEXT_H
 
 
 // Base files
@@ -22,13 +22,13 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int
  * Visual Novel Text
  * VNObject that contains and displays wstring text
  ************************************************/
-class TextBox : public VNObject
+class Text : public VNObject
 {
 	private:
 		std::wstring content;
 		
 		// Private default constructor
-		TextBox() { }
+		Text() { };
 	
 	public:
 		/* Constructor */
@@ -56,7 +56,7 @@ class TextBox : public VNObject
 			this->mod[L"highlight"] = 1;
 			
 			// 1 pauses and waits for the user to continue
-			this->mod[L"p"] = 0
+			this->mod[L"p"] = 0;
 			
 			// Font
 			this->mod[L"size"] = 12;
@@ -136,7 +136,7 @@ class TextBox : public VNObject
 						}
 						else
 						{
-							wcout << L"No specified location for given parameter value in this Text object";
+							std::wcout << L"No specified location for given parameter value in this Text object";
 						}
 						
 						break;
@@ -164,13 +164,12 @@ class TextBox : public VNObject
 			}
 			else
 			{
-				wcout << content;
+				std::wcout << content;
 				
 				// Wait to continue if needed
 				if(this->mod[L"p"] == 1)
 				{
-					wcout << "\nPress enter to continue...\n";
-					wcin.ignore( numeric_limits <streamsize> ::max(), '\n' );
+					enterToContinue();
 				}
 			}
 			

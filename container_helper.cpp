@@ -26,7 +26,7 @@
 // Add parameters to a Container
 unsigned int setContParams(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
-	Container* c = vn->getActiveCont();
+	Container* c = vn->getContAt(vn->getCurr());
 	
 	if(c != NULL)
 	{

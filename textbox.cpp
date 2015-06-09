@@ -11,6 +11,7 @@
 #include <fcntl.h>
 
 // Base files
+#include "keywords.h"
 #include "vnovel.h"
 #include "container.h"
 #include "component.h"
@@ -19,40 +20,37 @@
 // Class header
 #include "textbox.h"
 
-// Namespaces
-using namespace std;
+// Content VNObject headers
+#include "text.h"
 
 
 /* Control functions */
 
 // Create a TextBox
-unsigned int makeTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
+unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
 	unsigned int out = start;
 	Container* cont = vn->getContAt(vn->getCurr());
-	TextBox* t;
+	TextBox* tb;
 	Component* comp;
 	
 	// Check if there is a place to store new TextBox
 	if(cont == NULL)
 	{
-		wcout << L"Nowhere to store this component";
+		std::wcout << L"Nowhere to store this component";
 		return start;
 	}
 	
 	// Check if another Component is active
 	if(cont->getCurrent() < cont->getNumContents())
 	{
-		wcout << L"Cannot add new content while something is still active";
+		std::wcout << L"Cannot add new content while something is still active";
 		return start;
 	}
 	
 	// Make and add the new TextBox
-	t = new TextBox(cont->getCurrent());
-	comp = t;
-	
-	// Set ending of previous Container to reference this Frame
-	comp->setNext(vn->getPrev(), vn->getCurr());
+	tb = new TextBox(cont->getCurrent());
+	comp = tb;
 	
 	// Add any other parameters
 	out = comp->setData(out, params);
@@ -63,7 +61,7 @@ unsigned int makeTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstri
 };
 
 // End a TextBox
-unsigned int endTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
+unsigned int endTextBox(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
 	Container* cont = vn->getContAt(vn->getCurr());
 	Component* comp;
@@ -96,12 +94,12 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstrin
 				if(cont->numFrozen() > 0)
 				{
 					// Go to the next element to be unfrozen
-					v->setFreeze(cont->getFrz(cont->numFrozen() - 1).getID().second);
+					v->setFreeze( cont->getFrz(cont->numFrozen() - 1)->getID() );
 				}
 				else
 				{
 					// Error; ignore keyword
-					std::wcout << L"Did not expect " << UNFREEZE << " here; ignoring keyword";
+					std::wcout << L"Did not expect " << UNFREEZE << L" here; ignoring keyword";
 					
 					// Go to the end of the Container's content list
 					v->setEnd(cont->getNumContents());
@@ -114,8 +112,8 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstrin
 			}
 			
 			// Implicitly set a pause at the end of a TextBox
-			pair<int, wstring> p[] = {make_pair(OBJ_PARAM, L"p")};
-			vector<pair<int, wstring>> pause(p, p + sizeof(p)/sizeof(pair<int, wstring>));
+			std::vector< std::pair<int, std::wstring> > pause = params;
+			pause.push_back(std::make_pair(PARAM_VAL, L"p"));
 			vnobjects[L"obj_param"](vn, 0, pause);
 			
 			// Component is no longer active for editing
@@ -123,12 +121,12 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, vector< pair<int, wstrin
 		}
 		else
 		{
-			wcout << L"No TextBox to end";
+			std::wcout << L"No TextBox to end";
 		}
 	}
 	else
 	{
-		wcout << L"No Container; therefore, no TextBox to end";
+		std::wcout << L"No Container; therefore, no TextBox to end";
 	}
 	
 	// On end, ignore the rest of params

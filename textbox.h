@@ -62,8 +62,6 @@ class TextBox : public Component
 			
 			// Default editing/traversal parameters
 			this->current = 0;
-			this->freeze = -1;
-			this->end = -1;
 			
 			// Add modifiers to map
 			
@@ -168,7 +166,6 @@ class TextBox : public Component
 		void resetPlay()
 		{
 			this->current = 0;
-			this->ending = 0;
 		};
 		
 		/* Destructor */

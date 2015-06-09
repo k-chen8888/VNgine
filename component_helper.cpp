@@ -24,13 +24,13 @@
 // Add parameters to a Component
 unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
-	Container* cont = vn->getActiveCont();
+	Container* cont = vn->getContAt(vn->getCurr());
 	Component* c;
 	
 	// Is there a valid Container?
 	if(cont != NULL)
 	{
-		c = cont->getActiveComp();
+		c = cont->getContentAt(cont->getCurrent());
 		
 		if(c != NULL)
 		{

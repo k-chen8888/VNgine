@@ -11,6 +11,7 @@
 #include <fcntl.h>
 
 // Base files
+#include "keywords.h"
 #include "vnovel.h"
 #include "container.h"
 #include "component.h"
