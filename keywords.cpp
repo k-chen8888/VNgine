@@ -13,8 +13,11 @@
 // Base files
 #include "vnovel.h"
 #include "container.h"
+#include "container_helper.h"
 #include "component.h"
+#include "component_helper.h"
 #include "vnobject.h"
+#include "vnobject_helper.h"
 
 // Class header
 #include "keywords.h"
@@ -31,7 +34,7 @@
 void addKeywords()
 {
 	/* General */
-	addToContainers(L"comment", &ignoreComments)
+	addToContainers(L"comment", &ignoreComments);
 	
 	
 	/* Containers */

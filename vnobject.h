@@ -11,6 +11,9 @@
 class VNObject
 {
 	protected:
+		// Identifying information
+		std::wstring type;                     // Class name
+		
 		// Modifier map (keywords -> integers)
 		std::map<std::wstring, int> mod;
 		
@@ -19,7 +22,7 @@ class VNObject
 		int end = -1;                          // A jump to the next Component if > -1
 		
 		// Error messages
-		std::vector<std::wstring> err;
+		std::vector< std::pair<int, std::wstring> > err;
 	
 	public:
 		/*******************************************

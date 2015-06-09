@@ -10,24 +10,9 @@
 #include "vnobject.h"
 
 
-// Macros for warnings
-// Warnings happen when the object is unsure if erratic behavior is intended
-// All warnings have the code -1
-#define BAD_DELIM_WARN   std::wstring(L"[Warning] Incorrect delimiter for TextBox parameters")
-#define END_PLAY_WARN    std::wstring(L"[Warning] Reached end of playback")
-
-
 // Macros for error messages
 // Errors happen when the object is sure that behavior is wrong
-#define BAD_PARAM        -2
-#define BAD_PARAM_ERR    std::wstring(L"[TextBox Error -2] Parameter name not found")
-
-#define FLOATING_VAL     -3
-#define FLOATING_VAL_ERR std::wstring(L"[TextBox Error -3] Tried to add value without giving a parameter name")
-#define BAD_VAL          -4
-#define BAD_VAL_ERR      std::wstring(L"[TextBox Error -4] Only integer parameter values are allowed")
-#define MISSING_VAL      -5
-#define MISSING_VAL_ERR  std::wstring(L"[TextBox Error -5] Invoked a parameter name without giving it a value")
+#define TEXTBOX_MAP_TYPE L"'integer'"
 
 
 /* Control functions */
@@ -46,6 +31,9 @@ unsigned int endTextBox(VNovel* vn, unsigned int start,  std::vector< std::pair<
 class TextBox : public Component
 {
 	private:
+		// Modifier map (keywords -> integers)
+		std::map<std::wstring, int> mod;
+		
 		// Private default constructor
 		TextBox() { }
 	
@@ -96,7 +84,7 @@ class TextBox : public Component
 							int val = toInt(params[i + 1].second);
 							if(val == -1)
 							{
-								this->err.push_back(std::make_pair(BAD_VAL, BAD_VAL_ERR));
+								this->err.push_back(std::make_pair(BAD_VAL, OPEN_BRACKET + this->type + BAD_VAL_ERR + TEXTBOX_MAP_TYPE));
 							}
 							else
 							{
@@ -106,7 +94,7 @@ class TextBox : public Component
 								}
 								else
 								{
-									this->err.push_back(std::make_pair(BAD_PARAM, BAD_PARAM_ERR));
+									this->err.push_back(std::make_pair(BAD_KEY, OPEN_BRACKET + this->type + BAD_KEY_ERR));
 								}
 							}
 							
@@ -114,19 +102,19 @@ class TextBox : public Component
 						}
 						else
 						{
-							this->err.push_back(std::make_pair(MISSING_VAL, MISSING_VAL_ERR));
+							this->err.push_back(std::make_pair(NO_VAL, OPEN_BRACKET + this->type + NO_VAL_ERR));
 						}
 						
 						break;
 					
 					// Floating parameter value delimiter (skip)
 					case PARAM_VAL:
-						this->err.push_back(std::make_pair(FLOATING_VAL, FLOATING_VAL_ERR));
+						this->err.push_back(std::make_pair(NO_NAME, OPEN_BRACKET + this->type + NO_NAME_ERR));
 						break;
 					
 					// All other delimiters
 					default:
-						this->err.push_back(std::make_pair(-1, BAD_DELIM_WARN));
+						this->err.push_back(std::make_pair(-1, DELIM_WARN_1 + this->type + DELIM_WARN_2));
 						return i;
 				}
 			}

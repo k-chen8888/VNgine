@@ -10,32 +10,20 @@
 #include "vnobject.h"
 
 
-// Macros for warnings
-// Warnings happen when the object is unsure if erratic behavior is intended
-// All warnings have the code -1
-#define BAD_DELIM_WARN   std::wstring(L"[Warning] Incorrect delimiter for Frame parameters")
-#define END_PLAY_WARN    std::wstring(L"[Warning] Reached end of playback")
-
-
 // Macros for error messages
 // Errors happen when the object is sure that behavior is wrong
-#define BAD_PARAM        -2
-#define BAD_PARAM_ERR    L"[Frame Error -2] Parameter name not found"
-#define FLOATING_VAL     -3
-#define FLOATING_VAL_ERR L"[Frame Error -3] Tried to add value without giving a parameter name"
-
 #define EMPTY_FILE       -4
 #define EMPTY_FILE_ERR_1 L"[Frame Error -4] No file name given for map["
 #define EMPTY_FILE_ERR_2 L"]"
 
-#define BAD_FILE         -5
-#define BAD_FILE_ERR_1   L"[Frame Error -5] Unsupported file given for map["
-#define BAD_FILE_ERR_2   L"], "
+#define UNSUP_FILE       -5
+#define UNSUP_FILE_ERR_1 L"[Frame Error -5] Unsupported file given for map["
+#define UNSUP_FILE_ERR_2 L"], "
 
 #define CANNOT_FRZ       -6
-#define CANNOT_FRZ_ERR   L"[Frame Error -12] No content to freeze"
+#define CANNOT_FRZ_ERR   L"[Frame Error -6] No content to freeze"
 #define FRZ_EMPTY        -7
-#define FRZ_EMPTY_ERR    L"[Frame Error -13] Unable to unfreeze component; no frozen content found"
+#define FRZ_EMPTY_ERR    L"[Frame Error -7] Unable to unfreeze component; no frozen content found"
 
 
 /* Control functions */
@@ -79,57 +67,59 @@ class Frame : public Container
 			// Go through parameters and fill in data
 			for(int i = start; i < params.size(); i++)
 			{
-				if(params[i].first == CONT_PARAM)
+				switch(params[i].first)
 				{
-					if(this->mod.count(params[i].second) == 1)
-					{
-						p = params[i].second;
-					}
-					else
-					{
-						this->err.push_back(std::make_pair(BAD_PARAM, BAD_PARAM_ERR));
-						return i;
-					}
-				}
-				else if(params[i].first == PARAM_VAL)
-				{
-					if(p.length() > 0)
-					{
-						// Grab supported file types
-						std::vector<std::wstring> supported = this->mod[p].first;
-						
-						// Attempt to add new file to list
-						std::wstring filename = params[i].second;
-						if(filename.length() > 0)
+					case CONT_PARAM:
+						if(this->mod.count(params[i].second) == 1)
 						{
-							for(int i = 0; i < supported.size(); i++)
-							{
-								if( filename.compare( filename.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
-								{
-									this->mod[p].second.push_back(filename);
-									return 0;
-								}
-							}
-							
-							// Unsupported type error
-							this->err.push_back(std::make_pair(BAD_FILE, BAD_FILE_ERR_1 + p + BAD_FILE_ERR_2 + filename));
+							p = params[i].second;
 						}
 						else
 						{
-							// Empty string error
-							this->err.push_back(std::make_pair(EMPTY_FILE, EMPTY_FILE_ERR_1 + p + EMPTY_FILE_ERR_2));
+							this->err.push_back(std::make_pair(BAD_KEY, OPEN_BRACKET + this->type + BAD_KEY_ERR));
 						}
-					}
-					else
-					{
-						this->err.push_back(std::make_pair(FLOATING_VAL, FLOATING_VAL_ERR));
+						
+						break;
+					
+					case PARAM_VAL:
+						if(p.length() > 0)
+						{
+							// Grab supported file types
+							std::vector<std::wstring> supported = this->mod[p].first;
+							
+							// Attempt to add new file to list
+							std::wstring filename = params[i].second;
+							if(filename.length() > 0)
+							{
+								for(int i = 0; i < supported.size(); i++)
+								{
+									if( filename.compare( filename.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
+									{
+										this->mod[p].second.push_back(filename);
+									}
+									else
+									{
+										// Unsupported type error
+										this->err.push_back(std::make_pair(UNSUP_FILE, UNSUP_FILE_ERR_1 + p + UNSUP_FILE_ERR_2 + filename));
+									}
+								}
+							}
+							else
+							{
+								// Empty string error
+								this->err.push_back(std::make_pair(EMPTY_FILE, EMPTY_FILE_ERR_1 + p + EMPTY_FILE_ERR_2));
+							}
+						}
+						else
+						{
+							this->err.push_back(std::make_pair(NO_NAME, OPEN_BRACKET + this->type + NO_NAME_ERR));
+						}
+						
+						break;
+					
+					default:
+						this->err.push_back(std::make_pair(-1, DELIM_WARN_1 + this->type + DELIM_WARN_2));
 						return i;
-					}
-				}
-				else
-				{
-					this->err.push_back(std::make_pair(-1, BAD_DELIM_WARN));
-					return i;
 				}
 			}
 			
@@ -178,24 +168,31 @@ class Frame : public Container
 		
 		/* Playback */
 		
-		// Play through components (to GUI if gui == true, otherwise, to a command line)
+		// Play through Components (to GUI if gui == true, otherwise, to a command line)
 		// Output the index of the next Frame to jump to
 		int play(bool gui)
 		{
 			while(this->current < this->contents.size())
 			{
+				int prev = this->current;
 				this->current = this->contents[this->current]->play(gui);
-			}
-			
-			if(this->ending < this->next.size())
-			{
-				// Intentionally terminated playback?
-				if(this->ending >= this->next.size() - 1)
-					this->err.push_back(std::make_pair(-1, END_PLAY_WARN));
 				
-				// Update ending and return the next Frame to play
-				this->ending += 1;
-				return this->next[this->ending - 1].second;
+				if(this->ending < this->next.size())
+				{
+					// Check if Component that was just played was an ending point
+					if(prev == this->next[this->ending].first)
+					{
+						// Update ending
+						this->ending += 1;
+						
+						// Intentionally terminated playback?
+						if(this->ending >= this->next.size() - 1)
+							this->err.push_back(std::make_pair(-1, END_PLAY_WARN));
+						
+						// Return the next Container to play
+						return this->next[this->ending - 1].second;
+					}
+				}
 			}
 			
 			return -1;

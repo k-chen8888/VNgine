@@ -10,6 +10,11 @@
 #include "vnobject.h"
 
 
+// Macros for error messages
+// Errors happen when the object is sure that behavior is wrong
+#define TEXT_MAP_TYPE L"'integer'"
+
+
 /* Control functions */
 
 // Create a Text object
@@ -36,6 +41,9 @@ class Text : public VNObject
 		{
 			// Set unicode input/output
 			setUnicode(true, true);
+			
+			// Set identifiers
+			this->type = L"Text";
 			
 			// Add data
 			this->content = txt;
@@ -97,7 +105,7 @@ class Text : public VNObject
 							int val = toInt(params[i + 1].second);
 							if(val == -1)
 							{
-								// Report invalid parameter value error
+								this->err.push_back(std::make_pair(BAD_VAL, OPEN_BRACKET + this->type + BAD_VAL_ERR + TEXT_MAP_TYPE));
 							}
 							else
 							{
@@ -107,7 +115,7 @@ class Text : public VNObject
 								}
 								else
 								{
-									// Report key not found error
+									this->err.push_back(std::make_pair(BAD_KEY, OPEN_BRACKET + this->type + BAD_KEY_ERR));
 								}
 							}
 							
@@ -121,7 +129,7 @@ class Text : public VNObject
 							}
 							else
 							{
-								// Report no value for parameter error
+								this->err.push_back(std::make_pair(NO_VAL, OPEN_BRACKET + this->type + NO_VAL_ERR));
 							}
 						}
 						
@@ -136,7 +144,7 @@ class Text : public VNObject
 						}
 						else
 						{
-							std::wcout << L"No specified location for given parameter value in this Text object";
+							this->err.push_back(std::make_pair(NO_NAME, OPEN_BRACKET + this->type + NO_NAME_ERR));
 						}
 						
 						break;

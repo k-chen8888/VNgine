@@ -16,9 +16,6 @@ class Component
 		std::wstring type;                     // Class name
 		unsigned int index;                    // Index in list
 		
-		// Modifier map (keywords -> integers)
-		std::map<std::wstring, int> mod;
-		
 		// Traversal
 		unsigned int current;                  // Current position being played/edited
 		std::vector<VNObject*> contents;       // Stuff inside this Component
