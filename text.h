@@ -174,6 +174,14 @@ class TextBox : public VNObject
 				}
 			}
 			
+			// Freeze and jump
+			if(this->freeze > -1)
+				return this->freeze;
+			
+			// End and jump
+			if(this->end > -1)
+				return this->end;
+			
 			// Continue within component
 			return -1;
 		};

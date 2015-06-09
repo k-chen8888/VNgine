@@ -43,26 +43,6 @@ class Component
 			this->current += 1;
 		};
 		
-		// Tell this Component where to stop and where to go next
-		// -1 implies that there is nothing left to jump to
-		void setNext(int stop_pt, int n)
-		{
-			if(n < 0)
-			{
-				if(stop_pt > -1)
-				{
-					this->next.push_back( std::make_pair(stop_pt, n) );
-				}
-			}
-			else // Set next Container's index for the last ending in the list
-			{
-				if(this->next.size() > 0)
-				{
-					this->next[this->next.size() - 1].second = n;
-				}
-			}
-		};
-		
 		/* Playback */
 		
 		// Play the Component

@@ -6,12 +6,6 @@
 #include "keywords.h"
 
 
-/* Control functions */
-
-// Add parameters to a VNObject
-unsigned int setObjParams(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params);
-
-
 /* Abstract class for a visual novel object inside a component
  */
 class VNObject

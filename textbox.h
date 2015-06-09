@@ -145,18 +145,19 @@ class TextBox : public Component
 			int out = -1;
 			
 			// Play current component until output changes
-			while(this->current < this->contents.size())
+			while(out == -1)
 			{
 				// Play and move on to the next content
-				this->contents[this->current]->play(gui);
+				out = this->contents[this->current]->play(gui);
 				this->current += 1;
 				
 				// Check for an ending point
-				if(this->current - 1 == this->next[this->ending].first)
+				if(out > -1)
 				{
-					out = this->next[this->ending].second;
-					this->ending += 1;
-					return out;
+					// Freeze? (Can only tell from GUI)
+					
+					// End?
+					
 				}
 			}
 			

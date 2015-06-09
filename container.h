@@ -140,7 +140,7 @@ class Container
 		Component* getFrz(unsigned int i)
 		{
 			if(i < this->frz.size())
-				return this->frz[i];
+				return this->contents[this->frz[i]];
 			else
 				return NULL;
 		}
