@@ -107,9 +107,6 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring>
 // Class constructor
 Frame::Frame(std::wstring n, int i)
 {
-	//Set unicode input/output
-	setUnicode(true, true);
-	
 	// Set identifiers
 	this->type = L"Frame";
 	this->name = n;

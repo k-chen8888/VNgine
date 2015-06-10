@@ -41,9 +41,6 @@ class TextBox : public Component
 		/* Constructor */
 		TextBox(int loc)
 		{
-			//Set unicode input/output
-			setUnicode(true, true);
-			
 			// Set identifiers
 			this->type = L"TextBox";
 			this->index = loc;

@@ -39,9 +39,6 @@ class Text : public VNObject
 		/* Constructor */
 		Text(std::wstring txt)
 		{
-			// Set unicode input/output
-			setUnicode(true, true);
-			
 			// Set identifiers
 			this->type = L"Text";
 			

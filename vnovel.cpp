@@ -363,19 +363,6 @@ void enterToContinue()
 /* Constructor */
 VNovel::VNovel(std::string src)
 {
-	//Set unicode input/output
-	int e = setUnicode(true, true);
-	if(e == SET_IN)
-	{
-		std::cout << SET_IN_ERR;
-		this->err.push_back(L"Must terminate");
-	}
-	if(e == SET_OUT)
-	{
-		std::cout << SET_OUT_ERR;
-		this->err.push_back(L"Must terminate");
-	}
-	
 	this->source = src;
 	this->prev = -1;
 	this->curr = 0;

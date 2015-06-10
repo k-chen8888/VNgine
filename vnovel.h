@@ -93,6 +93,12 @@ class VNovel
 		// Plays the visual novel
 		int playNovel(bool gui)
 		{
+			while( this->curr < this->cont.size() )
+			{
+				this->prev = this->curr;
+				this->cont[this->curr]->play(gui);
+			}
+			
 			return 0;
 		};
 		
