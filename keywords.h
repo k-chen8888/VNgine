@@ -64,8 +64,8 @@
 #define COMP_PARAM 7
 #define OBJ_OPEN   9
 #define OBJ_PARAM  11
-#define PARAM_VAL  13
-#define TXT_TOKEN  15
+#define TXT_TOKEN  13
+#define PARAM_VAL  15
 
 
 /* Add all keywords here */

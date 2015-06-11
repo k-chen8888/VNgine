@@ -35,7 +35,7 @@ std::map<std::wstring, buildF> components;
 std::map<std::wstring, buildF> vnobjects;
 
 // Delimiter vector
-wchar_t d[] = {L'\\', L'{', L'}', L'~', L'~', L'[', L']', L':', L':', L'(', L')', L'#', L'#', L'\'', L'\'', L'"', L'"'};
+wchar_t d[] = {L'\\', L'{', L'}', L'~', L'~', L'[', L']', L':', L':', L'(', L')', L'#', L'#', L'"', L'"', L'\'', L'\''};
 std::vector<wchar_t> delim (d, d + sizeof(d)/sizeof(wchar_t));
 
 // Ignored characters
@@ -92,12 +92,12 @@ int addToVNObjects(std::wstring kw, buildF b)
 std::wstring escape(std::wstring token, std::vector<unsigned int> e)
 {
 	std::wstring out;
-	int start = 0;
+	unsigned int start = 0;
 	
 	if(e.size() > 0)
 	{
-		int j = 0;
-		for(int i = 0; i < token.length(); i++)
+		unsigned int j = 0;
+		for(unsigned int i = 0; i < token.length(); i++)
 		{
 			if(i == e[j])
 			{
@@ -107,54 +107,47 @@ std::wstring escape(std::wstring token, std::vector<unsigned int> e)
 				
 				// Update
 				j += 1;
-				start = i + 1;
+				start = i + 2;
 				
 				// Handle standard escape characters
-				if(start < token.length())
+				if(start - 1 < token.length())
 				{
-					switch(token.at(start))
+					switch(token.at(start - 1))
 					{
 						// Escape character itself
 						case L'\\':
 							out = out + L"\\";
-							start += 1;
 							j += 1;
 							break;
 						
 						// Backspace
 						case L'b':
 							out = out + L"\b";
-							start += 1;
 							break;
 						
 						// Form feed
 						case L'f':
 							out = out + L"\f";
-							start += 1;
 							break;
 						
 						// Line feed
 						case L'n':
 							out = out + L"\n";
-							start += 1;
 							break;
 						
 						// Carriage return
 						case L'r':
 							out = out + L"\r";
-							start += 1;
 							break;
 						
 						// Horizontal tab
 						case L't':
 							out = out + L"\t";
-							start += 1;
 							break;
 						
 						// Vertical tab
 						case L'v':
 							out = out + L"\v";
-							start += 1;
 							break;
 						
 						// All other cases (include in the next set)
@@ -186,131 +179,111 @@ std::wstring strip(std::wstring token)
 {
 	std::wstring out;
 	
-	// Starting ignored characters
-	bool change = true;
-	bool ig = false;
-	int i = 0;
-	while(change && i < token.length())
+	unsigned int start = 0;
+	unsigned int end = 0;
+	
+	bool start_set = false;
+	
+	// Go through the token to find the real start and end points
+	for(unsigned int i = 0; i < token.length(); i++)
 	{
-		ig = false;
-		for(int j = 0; j < ign.size(); j++)
+		if(!start_set)
 		{
-			if(token.at(i) == ign[j])
+			// Find the start point first
+			bool in_ign = false;
+			for(unsigned int j = 0; j < ign.size(); j++)
 			{
-				ig = true;
-				j = ign.size();
+				// in_ign will be true if any of the characters in the vector ign matches the current character
+				in_ign = ( (token.at(i) == ign[j]) || in_ign );
+			}
+			
+			// The first character that is not in the ignore list is the real start
+			if(!in_ign)
+			{
+				start = i;
+				end = start;
+				start_set = true;
 			}
 		}
-		
-		if(ig)
-			i += 1;
 		else
-			change = false;
-	}
-	
-	// Strip out the starting ignored characters
-	if(i < token.length())
-	{
-		if(i == 0)
-			out = token;
-		else
-			out = token.substr(i, token.length() - i);
-	}
-	else // Entire token to be ignored
-	{
-		return out;
-	}
-	
-	// Ending ignored characters
-	change = true;
-	i = out.length() - 1;
-	while(change && i > -1)
-	{
-		ig = false;
-		for(int j = 0; j < ign.size(); j++)
 		{
-			if(token.at(i) == ign[j])
+			// Then find the end point
+			for(unsigned int j = 0; j < ign.size(); j++)
 			{
-				ig = true;
-				j = ign.size();
+				// Whenever an ignored character is found, set end
+				if( token.at(i) == ign[j] )
+				{
+					end = i - 1;
+					j = ign.size();
+				}
 			}
 		}
-		
-		if(ig)
-			i -= 1;
-		else
-			change = false;
 	}
 	
-	// Strip out the ending ignored characters
-	if(i > 0)
+	// Evaluate output
+	if(!start_set)
 	{
-		if(i == out.length() - 1)
-			return out;
-		else
-			out = out.substr(0, i + 1);
+		return L"";
 	}
-	
-	return out;
+	else
+	{
+		return token.substr(start, end - start + 1);
+	}
 };
 
 // String to integer
 int toInt(std::wstring s)
 {
 	int val = 0;
-	int t_val = 0;
-	int pos = 0;
-	while(pos < s.length())
+	
+	for(unsigned int i = 0; i < s.length(); i++)
 	{
-		switch(s.at(pos))
+		switch(s.at(i))
 		{
 			case L'0':
-				t_val = 0;
+				val = val * 10 + 0;
 				break;
 			
 			case L'1':
-				t_val = 1;
+				val = val * 10 + 1;
 				break;
 			
 			case L'2':
-				t_val = 2;
+				val = val * 10 + 2;
 				break;
 			
 			case L'3':
-				t_val = 3;
+				val = val * 10 + 3;
 				break;
 			
 			case L'4':
-				t_val = 4;
+				val = val * 10 + 4;
 				break;
 			
 			case L'5':
-				t_val = 5;
+				val = val * 10 + 5;
 				break;
 			
 			case L'6':
-				t_val = 6;
+				val = val * 10 + 6;
 				break;
 			
 			case L'7':
-				t_val = 7;
+				val = val * 10 + 7;
 				break;
 			
 			case L'8':
-				t_val = 8;
+				val = val * 10 + 8;
 				break;
 			
 			case L'9':
-				t_val = 9;
+				val = val * 10 + 9;
 				break;
 			
 			// Not an integer
 			default:
 				return -1;
 		}
-		
-		val = val * 10 + t_val;
-		pos += 1;
 	}
 	
 	return val;
@@ -383,152 +356,186 @@ int VNovel::buildVN()
 	
 	std::wstring line;
 	unsigned int lcount;
-	while( getline(ifile, line) )
+	while( getline(ifile, line) && line.length() > 0)
 	{
-		// PDA
-		PDA<std::wstring> script (line, delim);
+		// PDA, noisy enabled
+		PDA<std::wstring> script (line, delim, true);
 		
 		// Map lookup keywords
 		std::vector< std::pair<int, std::wstring> > kwlist;
 		
 		// Start position of current token
-		unsigned int start;
+		unsigned int start = 0;
+		
+		// Current size of the stack
+		unsigned int stack_depth = 0;
+		
+		// The topmost delimiter on the stack
+		unsigned int last_delim = 0;
 		
 		// Locations of escape characters
 		std::vector<unsigned int> esc;
 		
-		// Pull out and process the tokens
 		while(script.getPos() < line.length() && script.getErr() > -1)
 		{
+			// Get next token (PDA automatically increments position by 1)
 			std::wstring token = script.readNext();
-			int d = script.lastDelim();
 			
-			if(script.getErr() < -1)
+			if( stack_depth < script.stackDepth() )
 			{
-				this->err.push_back( L"[Error:L" + std::to_wstring(lcount) + L"] Improper formatting\n" );
+				// A new delimiter was added -> This must be an opening delimiter
+				stack_depth += 1;
+				
+				// Set start position of next token to be the current position of PDA
+				start = script.getPos();
+				
+				// Remove escape characters
+				std::wstring final_token = escape(token, esc);
+				esc.clear();
+				
+				// This token needs to be stripped because TXT_TOKEN cannot contain non-escaped opening delimiters
+				final_token = strip(final_token);
+				
+				// Was a token found?
+				if(final_token.length() > 0)
+				{
+					// Add to list of keywords
+					kwlist.push_back( std::make_pair( last_delim, final_token ) );
+				}
+				
+				// Save the new last delimiter
+				last_delim = script.lastDelim();
 			}
-			else // Found a token?
+			else if( stack_depth > script.stackDepth() )
 			{
-				if(token.length() > 0)
+				// A delimiter was removed -> a closing delimiter was found
+				stack_depth -= 1;
+				
+				// Set start position of next token to be the current position of PDA
+				start = script.getPos();
+				
+				// Remove escape characters
+				std::wstring final_token = escape(token, esc);
+				esc.clear();
+				
+				// Strip this token if it is not a TXT_TOKEN
+				if( line.at( script.getPos() - 1 ) == delim[TXT_TOKEN] )
 				{
-					// Check if tokens can be added when a new opening delimiter is pushed
-					if(d > 0)
-					{
-						// Check if the token is meaningful (enclosed in delimiters)
-						if(script.lastRemoved() > 0)
-						{
-							// Create the final token and add it to the list
-							std::wstring finaltoken = escape(token, esc);
-							if(script.lastRemoved() != TXT_TOKEN)
-								finaltoken = strip(finaltoken);
-							
-							kwlist.push_back( std::make_pair( script.lastRemoved(), finaltoken ) );
-							start = script.getPos();
-						}
-					}
-					
-					// Flush stack when the sequence ends
-					bool outofkw = script.stackDepth() == 0 && kwlist.size() > 0;
-					bool endofline = script.getPos() >= line.length();
-					if( outofkw || endofline )
-					{
-						unsigned int s = 0;
-						while(s < kwlist.size())
-						{
-							// Switch on the delimiter type
-							switch( kwlist[0].first )
-							{
-								// Container
-								case CONT_OPEN:
-									s = containers[ kwlist[0].second ](this, 1, kwlist);
-									break;
-								
-								// Container parameter
-								case CONT_PARAM:
-									// Attempt to add Container parameters
-									s = containers[ L"cont_param" ](this, 0, kwlist);
-									
-									// Returns the length of params on error
-									if(s == kwlist.size())
-									{
-										this->err.push_back(NO_CONT_ERR);
-										return NO_CONT;
-									}
-									
-									break;
-								
-								// Component
-								case COMP_OPEN:
-									s = components[ kwlist[0].second ](this, 1, kwlist);
-									break;
-								
-								// Component parameter
-								case COMP_PARAM:
-									// Attempt to add Component parameters
-									s = components[ L"comp_param" ](this, 0, kwlist);
-									
-									// Returns the length of params on error
-									if(s == kwlist.size())
-									{
-										this->err.push_back(NO_COMP_ERR);
-										return NO_COMP;
-									}
-									
-									break;
-								
-								// VNObject
-								case OBJ_OPEN:
-									s = vnobjects[ kwlist[0].second ](this, 1, kwlist);
-									break;
-								
-								// VNObject parameter
-								case OBJ_PARAM:
-									// Attempt to add Component parameters
-									s = vnobjects[ L"obj_param" ](this, 0, kwlist);
-									
-									// Returns the length of params on error
-									if(s == kwlist.size())
-									{
-										this->err.push_back(NO_OBJ_ERR);
-										return NO_OBJ;
-									}
-									
-									break;
-								
-								// Parameter value (misplaced)
-								case PARAM_VAL:
-									this->err.push_back(LOOSE_PARAM_ERR);
-									return LOOSE_PARAM;
-								
-								// Text token (misplaced)
-								case TXT_TOKEN:
-									this->err.push_back(LOOSE_TXT_ERR);
-									return LOOSE_TXT;
-								
-								// Everything else
-								default:
-									break;
-							}
-							
-							s += 1;
-						}
-						
-						// No more keywords
-						kwlist.clear();
-					}
+					final_token = strip(final_token);
 				}
-				else
+				
+				if(final_token.length() > 0)
 				{
-					if(script.isEsc()) // Mark escape characters
-						esc.push_back(script.getPos() - start);
+					// Add to list of keywords
+					kwlist.push_back( std::make_pair( script.lastRemoved(), final_token ) );
 				}
+				
+				// Save the new last delimiter
+				last_delim = script.lastDelim();
+			}
+			else
+			{
+				// Check for escape characters
+				if(script.isEsc())
+					esc.push_back(script.getPos() - start -  1);
 			}
 		}
 		
+		for(unsigned int k = 0; k < kwlist.size(); k++)
+			std::wcout << "(" << kwlist[k].first << ", " << kwlist[k].second << ") ";
+		
+		std::wcout << "\n";
+		
+		// Process the tokens found on this line
+		unsigned int s = 0;
+		while(s < kwlist.size())
+		{
+			// Switch on the delimiter type
+			switch( kwlist[0].first )
+			{
+				// Container
+				case CONT_OPEN:
+					s = containers[ kwlist[0].second ](this, 1, kwlist);
+					break;
+				
+				// Container parameter
+				case CONT_PARAM:
+					// Attempt to add Container parameters
+					s = containers[ L"cont_param" ](this, 0, kwlist);
+					
+					// Returns the length of params on error
+					if(s == kwlist.size())
+					{
+						this->err.push_back(NO_CONT_ERR);
+						return NO_CONT;
+					}
+					
+					break;
+				
+				// Component
+				case COMP_OPEN:
+					s = components[ kwlist[0].second ](this, 1, kwlist);
+					break;
+				
+				// Component parameter
+				case COMP_PARAM:
+					// Attempt to add Component parameters
+					s = components[ L"comp_param" ](this, 0, kwlist);
+					
+					// Returns the length of params on error
+					if(s == kwlist.size())
+					{
+						this->err.push_back(NO_COMP_ERR);
+						return NO_COMP;
+					}
+					
+					break;
+				
+				// VNObject
+				case OBJ_OPEN:
+					s = vnobjects[ kwlist[0].second ](this, 1, kwlist);
+					break;
+				
+				// VNObject parameter
+				case OBJ_PARAM:
+					// Attempt to add Component parameters
+					s = vnobjects[ L"obj_param" ](this, 0, kwlist);
+					
+					// Returns the length of params on error
+					if(s == kwlist.size())
+					{
+						this->err.push_back(NO_OBJ_ERR);
+						return NO_OBJ;
+					}
+					
+					break;
+				
+				// Parameter value (misplaced)
+				case PARAM_VAL:
+					this->err.push_back(LOOSE_PARAM_ERR);
+					return LOOSE_PARAM;
+				
+				// Text token (misplaced)
+				case TXT_TOKEN:
+					this->err.push_back(LOOSE_TXT_ERR);
+					return LOOSE_TXT;
+				
+				// Everything else
+				default:
+					break;
+			}
+			
+			s += 1;
+		}
+		
+		// No more keywords
+		kwlist.clear();
+		
+		// Count number of lines
 		lcount += 1;
 	}
 	
+	// Close the file and report success
 	ifile.close();
-	
 	return 0;
 };

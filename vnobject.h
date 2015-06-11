@@ -39,14 +39,14 @@ class VNObject
 		{
 			if(next > -1)
 				this->freeze = next;
-		}
+		};
 		
 		// Set an end point
 		void setEnd(int next)
 		{
 			if(next > -1)
 				this->end = next;
-		}
+		};
 		
 		/* Playback */
 		
@@ -66,6 +66,12 @@ class VNObject
 		bool isEnd()
 		{
 			return this->end > -1;
+		};
+		
+		// Virtual destructor
+		virtual ~VNObject()
+		{
+			std::wcout << "Removing all VNObject content...\n";
 		};
 };
 

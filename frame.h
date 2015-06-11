@@ -65,7 +65,7 @@ class Frame : public Container
 			std::wstring p = L"";
 			
 			// Go through parameters and fill in data
-			for(int i = start; i < params.size(); i++)
+			for(unsigned int i = start; i < params.size(); i++)
 			{
 				switch(params[i].first)
 				{
@@ -91,7 +91,7 @@ class Frame : public Container
 							std::wstring filename = params[i].second;
 							if(filename.length() > 0)
 							{
-								for(int i = 0; i < supported.size(); i++)
+								for(unsigned int i = 0; i < supported.size(); i++)
 								{
 									if( filename.compare( filename.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
 									{
@@ -204,7 +204,7 @@ class Frame : public Container
 			this->current = 0;
 			this->ending = 0;
 			
-			for(int i = 0; i < this->contents.size(); i++)
+			for(unsigned int i = 0; i < this->contents.size(); i++)
 			{
 				this->contents[i]->resetPlay();
 			}
@@ -213,10 +213,8 @@ class Frame : public Container
 		/* Destructor */
 		~Frame()
 		{
-			for(int i = 0; i < this->contents.size(); i++)
-			{
+			for(unsigned int i = 0; i < this->contents.size(); i++)
 				delete this->contents[i];
-			}
 		};
 };
 

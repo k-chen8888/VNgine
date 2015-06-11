@@ -143,13 +143,19 @@ class Container
 				return this->contents[this->frz[i]];
 			else
 				return NULL;
-		}
+		};
 		
 		// Get current number of frozen content elements
 		unsigned int numFrozen()
 		{
 			return this->frz.size();
-		}
+		};
+		
+		// Virtual destructor
+		virtual ~Container()
+		{
+			std::wcout << "Removing all Container content...\n";
+		};
 };
 
 

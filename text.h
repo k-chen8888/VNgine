@@ -90,7 +90,7 @@ class Text : public VNObject
 		// Fill in parameters
 		unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 		{
-			for(int i = start; i < params.size(); i++)
+			for(unsigned int i = start; i < params.size(); i++)
 			{
 				switch(params[i].first)
 				{
@@ -156,6 +156,8 @@ class Text : public VNObject
 						return i;
 				}
 			}
+			
+			return params.size() - 1;
 		};
 		
 		/* Playback */
@@ -163,7 +165,7 @@ class Text : public VNObject
 		// Play the VNObject
 		int play(bool gui)
 		{
-			if(gui)
+			if(gui)	
 			{
 				
 			}

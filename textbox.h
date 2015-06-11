@@ -69,7 +69,7 @@ class TextBox : public Component
 		// Fill in parameters
 		unsigned int setData(unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 		{
-			for(int i = start; i < params.size(); i++)
+			for(unsigned int i = start; i < params.size(); i++)
 			{
 				switch(params[i].first)
 				{
@@ -156,7 +156,7 @@ class TextBox : public Component
 		/* Destructor */
 		~TextBox()
 		{
-			for(int i = 0; i < this->contents.size(); i++)
+			for(unsigned int i = 0; i < this->contents.size(); i++)
 			{
 				delete this->contents[i];
 			}

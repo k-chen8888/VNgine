@@ -83,6 +83,12 @@ class Component
 		{
 			return this->contents.size();
 		};
+		
+		// Virtual destructor
+		virtual ~Component()
+		{
+			std::wcout << "Removing all Component content...\n";
+		};
 };
 
 

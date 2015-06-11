@@ -134,7 +134,7 @@ class VNovel
 		// Display all error messages
 		int reportErrors()
 		{
-			for(int i = 0; i < this->err.size(); i++)
+			for(unsigned int i = 0; i < this->err.size(); i++)
 				std::wcout << this->err[i] << "\n";
 			
 			return 0;
@@ -143,7 +143,7 @@ class VNovel
 		/* Destructor */
 		~VNovel()
 		{
-			for(int i = 0; i < this->cont.size(); i++)
+			for(unsigned int i = 0; i < this->cont.size(); i++)
 			{
 				delete this->cont[i];
 			}
