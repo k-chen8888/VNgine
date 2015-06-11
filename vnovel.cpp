@@ -359,7 +359,7 @@ int VNovel::buildVN()
 	while( getline(ifile, line) && line.length() > 0)
 	{
 		// PDA, noisy enabled
-		PDA<std::wstring> script (line, delim, true);
+		PDA<std::wstring> script (line, delim, false);
 		
 		// Map lookup keywords
 		std::vector< std::pair<int, std::wstring> > kwlist;
@@ -424,6 +424,7 @@ int VNovel::buildVN()
 					final_token = strip(final_token);
 				}
 				
+				// Was a token found?
 				if(final_token.length() > 0)
 				{
 					// Add to list of keywords
@@ -447,21 +448,30 @@ int VNovel::buildVN()
 		std::wcout << "\n";
 		
 		// Process the tokens found on this line
-		unsigned int s = 0;
-		while(s < kwlist.size())
+		for(unsigned int s = 0; s < kwlist.size(); s++)
 		{
 			// Switch on the delimiter type
-			switch( kwlist[0].first )
+			switch( kwlist[s].first )
 			{
 				// Container
 				case CONT_OPEN:
-					s = containers[ kwlist[0].second ](this, 1, kwlist);
+					// Attempt to create a Container
+					if( containers.count(kwlist[s].second) == 1 )
+					{
+						s = containers[ kwlist[s].second ](this, s + 1, kwlist);
+					}
+					else
+					{
+						std::wcout << NO_KEYWORD_ERR_1 << "Container" << NO_KEYWORD_ERR_2 << kwlist[s].second << std::endl;
+						return NO_KEYWORD;
+					}
+					
 					break;
 				
 				// Container parameter
 				case CONT_PARAM:
 					// Attempt to add Container parameters
-					s = containers[ L"cont_param" ](this, 0, kwlist);
+					s = containers[ L"cont_param" ](this, s, kwlist);
 					
 					// Returns the length of params on error
 					if(s == kwlist.size())
@@ -474,13 +484,23 @@ int VNovel::buildVN()
 				
 				// Component
 				case COMP_OPEN:
-					s = components[ kwlist[0].second ](this, 1, kwlist);
+					// Attempt to create a Component
+					if( components.count(kwlist[s].second) == 1 )
+					{
+						s = components[ kwlist[s].second ](this, s + 1, kwlist);
+					}
+					else
+					{
+						std::wcout << NO_KEYWORD_ERR_1 << "Component" << NO_KEYWORD_ERR_2 << kwlist[s].second << std::endl;
+						return NO_KEYWORD;
+					}
+					
 					break;
 				
 				// Component parameter
 				case COMP_PARAM:
 					// Attempt to add Component parameters
-					s = components[ L"comp_param" ](this, 0, kwlist);
+					s = components[ L"comp_param" ](this, s, kwlist);
 					
 					// Returns the length of params on error
 					if(s == kwlist.size())
@@ -493,13 +513,23 @@ int VNovel::buildVN()
 				
 				// VNObject
 				case OBJ_OPEN:
-					s = vnobjects[ kwlist[0].second ](this, 1, kwlist);
+					// Attempt to create a VNObject
+					if( vnobjects.count(kwlist[s].second) == 1 )
+					{
+						s = vnobjects[ kwlist[s].second ](this, s + 1, kwlist);
+					}
+					else
+					{
+						std::wcout << NO_KEYWORD_ERR_1 << "VNObject" << NO_KEYWORD_ERR_2 << kwlist[s].second << std::endl;
+						return NO_KEYWORD;
+					}
+					
 					break;
 				
 				// VNObject parameter
 				case OBJ_PARAM:
 					// Attempt to add Component parameters
-					s = vnobjects[ L"obj_param" ](this, 0, kwlist);
+					s = vnobjects[ L"obj_param" ](this, s, kwlist);
 					
 					// Returns the length of params on error
 					if(s == kwlist.size())
@@ -524,8 +554,6 @@ int VNovel::buildVN()
 				default:
 					break;
 			}
-			
-			s += 1;
 		}
 		
 		// No more keywords

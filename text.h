@@ -128,6 +128,8 @@ class Text : public VNObject
 							{
 								this->err.push_back(std::make_pair(NO_VAL, OPEN_BRACKET + this->type + NO_VAL_ERR));
 							}
+							
+							i += 1;
 						}
 						
 						break;
@@ -142,6 +144,7 @@ class Text : public VNObject
 						else
 						{
 							this->err.push_back(std::make_pair(NO_NAME, OPEN_BRACKET + this->type + NO_NAME_ERR));
+							i += 1;
 						}
 						
 						break;
@@ -149,6 +152,7 @@ class Text : public VNObject
 					// Content
 					case TXT_TOKEN:
 						this->content = params[i].second;
+						i += 1;
 						break;
 					
 					// All other delimiters

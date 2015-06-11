@@ -36,7 +36,7 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring
 	// Check if previous Container was closed out properly
 	if(vn->getCurr() < vn->numCont())
 	{
-		wcout << L"Open Container preventing creation of new Frame";
+		wcout << L"Open Container preventing creation of new Frame" << std::endl;
 		return start;
 	}
 	
@@ -85,12 +85,12 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring>
 		// Cannot close Frame if there is still something frozen or active, so return -1 + params.size() - 1
 		if(curr_frame->numFrozen() > 0)
 		{
-			wcout << L"Cannot close Frame if there is still something frozen";
+			wcout << L"Cannot close Frame if there is still something frozen" << std::endl;
 			return params.size() - 2;
 		}
 		if(curr_frame->getCurrent() < curr_frame->getNumContents())
 		{
-			wcout << L"Cannot close Frame if there is still something active";
+			wcout << L"Cannot close Frame if there is still something active" << std::endl;
 			return params.size() -2;
 		}
 		

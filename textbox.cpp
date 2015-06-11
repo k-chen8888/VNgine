@@ -37,14 +37,14 @@ unsigned int makeTextBox(VNovel* vn, unsigned int start, std::vector< std::pair<
 	// Check if there is a place to store new TextBox
 	if(cont == NULL)
 	{
-		std::wcout << L"Nowhere to store this component";
+		std::wcout << L"Nowhere to store this component" << std::endl;
 		return start;
 	}
 	
 	// Check if another Component is active
 	if(cont->getCurrent() < cont->getNumContents())
 	{
-		std::wcout << L"Cannot add new content while something is still active";
+		std::wcout << L"Cannot add new content while something is still active" << std::endl;
 		return start;
 	}
 	
@@ -67,6 +67,8 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, std::vector< std::pair<i
 	Component* comp;
 	Text* txt;
 	VNObject* v;
+	
+	bool unfrz = false;
 	
 	if(cont != NULL)
 	{
@@ -95,11 +97,13 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, std::vector< std::pair<i
 				{
 					// Go to the next element to be unfrozen
 					v->setFreeze( cont->getFrz(cont->numFrozen() - 1)->getID() );
+					
+					unfrz = true;
 				}
 				else
 				{
 					// Error; ignore keyword
-					std::wcout << L"Did not expect " << UNFREEZE << L" here; ignoring keyword";
+					std::wcout << L"Did not expect " << UNFREEZE << L" here; ignoring keyword" << std::endl;
 					
 					// Go to the end of the Container's content list
 					v->setEnd(cont->getNumContents());
@@ -118,15 +122,22 @@ unsigned int endTextBox(VNovel* vn, unsigned int start, std::vector< std::pair<i
 			
 			// Component is no longer active for editing
 			cont->deactivateContent();
+			
+			// Is there something to unfreeze?
+			if(unfrz)
+			{
+				// Unfreeze the frozen Component
+				cont->unfreeze();
+			}
 		}
 		else
 		{
-			std::wcout << L"No TextBox to end";
+			std::wcout << L"No TextBox to end" << std::endl;
 		}
 	}
 	else
 	{
-		std::wcout << L"No Container; therefore, no TextBox to end";
+		std::wcout << L"No Container; therefore, no TextBox to end" << std::endl;
 	}
 	
 	// On end, ignore the rest of params

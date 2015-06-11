@@ -40,7 +40,7 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int
 	// Check if there is a Container to store this VNObject inside
 	if(cont == NULL)
 	{
-		wcout << L"No active Container to store this object inside";
+		wcout << L"No active Container to store this object inside" << std::endl;
 		return start;
 	}
 	
@@ -48,7 +48,7 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int
 	comp = cont->getContentAt(cont->getCurrent());
 	if(comp == NULL)
 	{
-		wcout << L"No active Component to store this VNObject inside";
+		wcout << L"No active Component to store this VNObject inside" << std::endl;
 		return start;
 	}
 	
@@ -57,17 +57,18 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int
 	v = text;
 	
 	// Set parameters if there are any
-	while(out < params.size() && params[out].first > OBJ_OPEN)
+	if(params[out].first > OBJ_OPEN)
 	{
-		// Handle keyword 'freeze'
-		if(params[out].first == PARAM_VAL && params[out].second.compare(FREEZE) == 0)
-		{
-			out += 1;
-			frz = true;
-		}
-		else
+		for(; out < params.size(); out++)
 		{
 			out = v->setData(out, params);
+			
+			// Handle keyword 'freeze'
+			if(params[out].first == PARAM_VAL && params[out].second.compare(FREEZE) == 0)
+			{
+				out += 1;
+				frz = true;
+			}
 		}
 	}
 	

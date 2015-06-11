@@ -72,7 +72,7 @@ class Container
 		// Deactivate a content element
 		void deactivateContent()
 		{
-			if(this->current < this->contents.size() - 1)
+			if(this->current < this->contents.size())
 			{
 				this->previous = this->current;
 				this->current = this->contents.size();

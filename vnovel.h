@@ -24,20 +24,24 @@
 
 
 // Macros for VNovel error messages
-#define NO_CONT_ERR     std::wstring(L"No Container to store parameter values")
-#define NO_CONT         -2
+#define NO_KEYWORD       -3
+#define NO_KEYWORD_ERR_1 L"Cannot create a "
+#define NO_KEYWORD_ERR_2 L" using the given keyword "
 
-#define NO_COMP_ERR     std::wstring(L"No Component to store parameter values")
-#define NO_COMP         -3
+#define NO_CONT          -3
+#define NO_CONT_ERR      L"No Container to store parameter values"
 
-#define NO_OBJ_ERR      std::wstring(L"No VNObject to store parameter values")
-#define NO_OBJ          -4
+#define NO_COMP          -4
+#define NO_COMP_ERR      L"No Component to store parameter values"
 
-#define LOOSE_PARAM_ERR std::wstring(L"Parameter doesn't belong anywhere")
-#define LOOSE_PARAM     -5
+#define NO_OBJ           -5
+#define NO_OBJ_ERR       L"No VNObject to store parameter values"
 
-#define LOOSE_TXT_ERR   std::wstring(L"Text token doesn't belong anywhere")
-#define LOOSE_TXT       -6
+#define LOOSE_PARAM      -6
+#define LOOSE_PARAM_ERR  L"Parameter doesn't belong anywhere"
+
+#define LOOSE_TXT        -7
+#define LOOSE_TXT_ERR    L"Text token doesn't belong anywhere"
 
 
 /************************************************
