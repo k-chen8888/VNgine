@@ -3,8 +3,8 @@
 
 
 // Base files
-#include "keywords.h"
-#include "vnobject.h"
+#include "../keywords.h"
+#include "../vnobject_base/vnobject.h"
 
 
 /* Abstract class for a visual novel component

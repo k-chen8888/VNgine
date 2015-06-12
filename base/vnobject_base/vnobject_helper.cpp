@@ -11,10 +11,7 @@
 #include <fcntl.h>
 
 // Base files
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
+#include "vnobject_helper.h"
 
 
 /* Control functions */

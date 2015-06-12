@@ -10,24 +10,14 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-// Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
-
 // Class header
 #include "frame.h"
-
-// Namespaces
-using namespace std;
 
 
 /* Control functions */
 
 // Create a Frame
-unsigned int makeFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
+unsigned int makeFrame(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
 	unsigned int out = start;
 	Frame* f;
@@ -36,7 +26,7 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring
 	// Check if previous Container was closed out properly
 	if(vn->getCurr() < vn->numCont())
 	{
-		wcout << L"Open Container preventing creation of new Frame" << std::endl;
+		std::wcout << L"Open Container preventing creation of new Frame" << std::endl;
 		return start;
 	}
 	
@@ -64,7 +54,7 @@ unsigned int makeFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring
 };
 
 // End a Frame, closing out all frozen and active content
-unsigned int endFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring> > params)
+unsigned int endFrame(VNovel* vn, unsigned int start, std::vector< std::pair<int, std::wstring> > params)
 {
 	Container* curr_frame;
 	
@@ -78,19 +68,19 @@ unsigned int endFrame(VNovel* vn, unsigned int start, vector< pair<int, wstring>
 		}
 		else
 		{
-			wcout << L"Open Container is not a Frame";
+			std::wcout << L"Open Container is not a Frame" << std::endl;
 			return params.size() - 2;
 		}
 		
 		// Cannot close Frame if there is still something frozen or active, so return -1 + params.size() - 1
 		if(curr_frame->numFrozen() > 0)
 		{
-			wcout << L"Cannot close Frame if there is still something frozen" << std::endl;
+			std::wcout << L"Cannot close Frame if there is still something frozen" << std::endl;
 			return params.size() - 2;
 		}
 		if(curr_frame->getCurrent() < curr_frame->getNumContents())
 		{
-			wcout << L"Cannot close Frame if there is still something active" << std::endl;
+			std::wcout << L"Cannot close Frame if there is still something active" << std::endl;
 			return params.size() -2;
 		}
 		
@@ -113,10 +103,10 @@ Frame::Frame(std::wstring n, int i)
 	this->index = i;
 	
 	// Add frame object holders to map
-	vector<wstring> vbg;
-	vector<wstring> vbgm;
-	vector<wstring> vsfx;
-	vector<wstring> vsprites;
+	std::vector<std::wstring> vbg;
+	std::vector<std::wstring> vbgm;
+	std::vector<std::wstring> vsfx;
+	std::vector<std::wstring> vsprites;
 	
 	std::wstring types_bg[] = {L".jpg", L".png", L".gif"};
 	std::vector<std::wstring> supported_bg(types_bg, types_bg + 3);

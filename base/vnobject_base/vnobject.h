@@ -3,7 +3,7 @@
 
 
 // Base files
-#include "keywords.h"
+#include "../keywords.h"
 
 
 /* Abstract class for a visual novel object inside a component

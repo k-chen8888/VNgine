@@ -16,11 +16,15 @@
 
 
 // Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
+#include "base/keywords.h"
+#include "base/container_base/container.h"
+#include "base/component_base/component.h"
+#include "base/vnobject_base/vnobject.h"
+
+// Parser
+#include "base/pda/pda.h"
+#include "base/pda/pda_string.h"
+#include "base/pda/pda_wstring.h"
 
 
 // Macros for VNovel error messages

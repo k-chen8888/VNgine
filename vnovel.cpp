@@ -14,17 +14,8 @@
 // Libraries for "Press ENTER to continue..."
 #include <limits>
 
-// Base files
-#include "keywords.h"
+// Class header
 #include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
-
-// Parser
-#include "pda.h"
-#include "pda_string.h"
-#include "pda_wstring.h"
 
 
 /* Global variables */

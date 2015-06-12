@@ -10,18 +10,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-// Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
-
 // Class header
 #include "text.h"
-
-// Namespaces
-using namespace std;
 
 
 /* Control functions */
@@ -40,7 +30,7 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int
 	// Check if there is a Container to store this VNObject inside
 	if(cont == NULL)
 	{
-		wcout << L"No active Container to store this object inside" << std::endl;
+		std::wcout << L"No active Container to store this object inside" << std::endl;
 		return start;
 	}
 	
@@ -48,7 +38,7 @@ unsigned int makeText(VNovel* vn, unsigned int start, std::vector< std::pair<int
 	comp = cont->getContentAt(cont->getCurrent());
 	if(comp == NULL)
 	{
-		wcout << L"No active Component to store this VNObject inside" << std::endl;
+		std::wcout << L"No active Component to store this VNObject inside" << std::endl;
 		return start;
 	}
 	

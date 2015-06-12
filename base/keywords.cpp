@@ -11,23 +11,16 @@
 #include <fcntl.h>
 
 // Base files
-#include "vnovel.h"
-#include "container.h"
-#include "container_helper.h"
-#include "component.h"
-#include "component_helper.h"
-#include "vnobject.h"
-#include "vnobject_helper.h"
+#include "../vnovel.h"
+#include "container_base/container_helper.h"
+#include "component_base/component_helper.h"
+#include "vnobject_base/vnobject_helper.h"
 
 // Class header
 #include "keywords.h"
 
 // Parts of the Visual Novel
-#include "frame.h"
-
-#include "textbox.h"
-
-#include "text.h"
+#include "../features/features.h"
 
 
 /* Add all keywords here */

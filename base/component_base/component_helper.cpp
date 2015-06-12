@@ -10,13 +10,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-// Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
-
+// Class header
+#include "component_helper.h"
 
 
 /* Control functions */
@@ -39,12 +34,12 @@ unsigned int setCompParams(VNovel* vn, unsigned int start, std::vector< std::pai
 		}
 		else
 		{
-			std::wcout << L"No Component to store parameters in";
+			std::wcout << L"No Component to store parameters in" << std::endl;
 		}
 	}
 	else
 	{
-		std::wcout << L"No Container; therefore, no place to store Component parameters";
+		std::wcout << L"No Container; therefore, no place to store Component parameters" << std::endl;
 	}
 	
 	return params.size() - 1;

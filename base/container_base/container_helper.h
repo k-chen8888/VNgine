@@ -3,8 +3,9 @@
 
 
 // Base files
-#include "keywords.h"
-#include "vnovel.h"
+#include "../keywords.h"
+#include "../../vnovel.h"
+#include "container.h"
 
 
 /* Control functions */

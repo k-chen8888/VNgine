@@ -3,11 +3,10 @@
 
 
 // Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
+#include "../keywords.h"
+#include "../../vnovel.h"
+#include "../container_base/container.h"
 #include "component.h"
-#include "vnobject.h"
 
 
 /* Control functions */

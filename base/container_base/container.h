@@ -3,10 +3,9 @@
 
 
 // Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "component.h"
-#include "vnobject.h"
+#include "../keywords.h"
+#include "../../vnovel.h"
+#include "../component_base/component.h"
 
 
 /* Abstract class for a visual novel component container

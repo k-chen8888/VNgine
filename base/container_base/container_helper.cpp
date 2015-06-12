@@ -10,15 +10,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-// Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
-
 // Class header
-#include "container.h"
+#include "container_helper.h"
 
 
 /* Control functions */

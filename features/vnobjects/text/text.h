@@ -3,11 +3,7 @@
 
 
 // Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
+#include "../../../vnovel.h"
 
 
 // Macros for error messages

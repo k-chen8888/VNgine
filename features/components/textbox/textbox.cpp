@@ -10,18 +10,11 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-// Base files
-#include "keywords.h"
-#include "vnovel.h"
-#include "container.h"
-#include "component.h"
-#include "vnobject.h"
-
 // Class header
 #include "textbox.h"
 
 // Content VNObject headers
-#include "text.h"
+#include "../../vnobjects/text/text.h"
 
 
 /* Control functions */
