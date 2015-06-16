@@ -101,13 +101,27 @@ class VNovel
 		// Plays the visual novel
 		int playNovel(bool gui)
 		{
+			
 			while( this->curr < this->cont.size() )
 			{
 				this->prev = this->curr;
-				this->cont[this->curr]->play(gui);
+				this->curr = this->cont[this->curr]->play(gui);
 			}
 			
 			return 0;
+		};
+		
+		// Reset playback
+		void resetPlay()
+		{
+			this->prev = -1;
+			this->curr = 0;
+			
+			// Reset Container playback
+			for(unsigned int i = 0; i < this->cont.size(); i++)
+			{
+				this->cont[i]->resetPlay();
+			}
 		};
 		
 		/* Reporting */
@@ -116,7 +130,7 @@ class VNovel
 		unsigned int numCont()
 		{
 			return this->cont.size();
-		}
+		};
 		
 		// Index of currently active Container
 		unsigned int getCurr()

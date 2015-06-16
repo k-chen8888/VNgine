@@ -28,7 +28,7 @@ unsigned int setContParams(VNovel* vn, unsigned int start, std::vector< std::pai
 	}
 	else // No Container to store parameters inside
 	{
-		std::wcout << L"No Container to set parameters for";
+		std::wcout << L"No Container to set parameters for" << std::endl;
 		return params.size() - 1;
 	}
 };

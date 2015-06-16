@@ -92,7 +92,7 @@ class Text : public VNObject
 				{
 					// VNObject parameter delimiter
 					case OBJ_PARAM:
-						if(params[i + 1].first == PARAM_VAL)
+						if(i + 1 < params.size() && params[i + 1].first == PARAM_VAL)
 						{
 							// Attempt to generate integer
 							int val = toInt(params[i + 1].second);
@@ -118,14 +118,12 @@ class Text : public VNObject
 						{
 							if(params[i].second.compare(L"p") == 0)
 							{
-								this->mod[L"p"] = 1;
+								this->mod[L"p"] = (this->mod[L"p"] + 1) % 2;
 							}
 							else
 							{
 								this->err.push_back(std::make_pair(NO_VAL, OPEN_BRACKET + this->type + NO_VAL_ERR));
 							}
-							
-							i += 1;
 						}
 						
 						break;
@@ -140,7 +138,6 @@ class Text : public VNObject
 						else
 						{
 							this->err.push_back(std::make_pair(NO_NAME, OPEN_BRACKET + this->type + NO_NAME_ERR));
-							i += 1;
 						}
 						
 						break;
@@ -148,7 +145,6 @@ class Text : public VNObject
 					// Content
 					case TXT_TOKEN:
 						this->content = params[i].second;
-						i += 1;
 						break;
 					
 					// All other delimiters
@@ -165,13 +161,13 @@ class Text : public VNObject
 		// Play the VNObject
 		int play(bool gui)
 		{
-			if(gui)	
+			if(gui)
 			{
 				
 			}
 			else
 			{
-				std::wcout << content;
+				std::wcout << this->content << std::flush;
 				
 				// Wait to continue if needed
 				if(this->mod[L"p"] == 1)

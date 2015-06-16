@@ -107,42 +107,43 @@ std::wstring escape(std::wstring token, std::vector<unsigned int> e)
 					{
 						// Escape character itself
 						case L'\\':
-							out = out + L"\\";
+							out = out + L'\\';
 							j += 1;
 							break;
 						
 						// Backspace
 						case L'b':
-							out = out + L"\b";
+							out = out + L'\b';
 							break;
 						
 						// Form feed
 						case L'f':
-							out = out + L"\f";
+							out = out + L'\f';
 							break;
 						
 						// Line feed
 						case L'n':
-							out = out + L"\n";
+							out = out + L'\n';
 							break;
 						
 						// Carriage return
 						case L'r':
-							out = out + L"\r";
+							out = out + L'\r';
 							break;
 						
 						// Horizontal tab
 						case L't':
-							out = out + L"\t";
+							out = out + L'\t';
 							break;
 						
 						// Vertical tab
 						case L'v':
-							out = out + L"\v";
+							out = out + L'\v';
 							break;
 						
 						// All other cases (include in the next set)
 						default:
+							out += token.at(start - 1);
 							break;
 					}
 				}
@@ -311,8 +312,13 @@ int setUnicode(bool in, bool out)
 // "Press ENTER to continue..."
 void enterToContinue()
 {
-	std::wcout << "\nPress ENTER to continue...\n";
-	std::wcin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );	
+	// Clear and flush input stream to prevent skipping
+	std::wcin.clear();
+	std::fflush(stdin);
+	
+	// Pause and wait for user to press ENTER
+	std::wcout << "\nPress ENTER to continue..." << std::endl;
+	std::wcin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
 };
 
 

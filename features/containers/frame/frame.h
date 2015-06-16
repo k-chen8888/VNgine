@@ -200,6 +200,7 @@ class Frame : public Container
 			this->current = 0;
 			this->ending = 0;
 			
+			// Reset playback for all content elements
 			for(unsigned int i = 0; i < this->contents.size(); i++)
 			{
 				this->contents[i]->resetPlay();
