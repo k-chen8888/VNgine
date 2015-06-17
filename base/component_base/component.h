@@ -84,10 +84,30 @@ class Component
 			return this->contents.size();
 		};
 		
+		// Display all error messages
+		void reportErrors()
+		{
+			for(unsigned int i = 0; i < this->err.size(); i++)
+				std::wcout << L"[Error " << this->err[i].first << L"] " << this->err[i].second << std::endl;
+		};
+		
 		// Virtual destructor
 		virtual ~Component()
 		{
-			std::wcout << "Removing all Component content...\n";
+			// Automatically report errors before deallocating memory
+			if(this->err.size() > 0)
+			{
+				std::wcout << L"Auto-generated error report" << std::endl;
+				this->reportErrors();
+				std::wcout << std::endl;
+			}
+			else
+			{
+				std::wcout << L"No errors\n" << std::endl;
+			}
+			
+			// Deallocate memory for everything
+			std::wcout << L"Removing all Component content..." << std::endl;
 		};
 };
 

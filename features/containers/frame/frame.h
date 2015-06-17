@@ -87,17 +87,21 @@ class Frame : public Container
 							std::wstring filename = params[i].second;
 							if(filename.length() > 0)
 							{
+								bool found = false;
 								for(unsigned int i = 0; i < supported.size(); i++)
 								{
-									if( filename.compare( filename.length() - 4, 4, supported[i] ) == 0 ) // Found a supported type
+									if( filename.compare( filename.rfind(L"."), supported[i].length(), supported[i] ) == 0 ) // Found a supported type
 									{
 										this->mod[p].second.push_back(filename);
+										found = true;
+										i = supported.size();
 									}
-									else
-									{
-										// Unsupported type error
-										this->err.push_back(std::make_pair(UNSUP_FILE, UNSUP_FILE_ERR_1 + p + UNSUP_FILE_ERR_2 + filename));
-									}
+								}
+								
+								if(!found)
+								{
+									// Unsupported type error
+									this->err.push_back(std::make_pair(UNSUP_FILE, UNSUP_FILE_ERR_1 + p + UNSUP_FILE_ERR_2 + filename));
 								}
 							}
 							else

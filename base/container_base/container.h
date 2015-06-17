@@ -150,10 +150,30 @@ class Container
 			return this->frz.size();
 		};
 		
+		// Display all error messages
+		void reportErrors()
+		{
+			for(unsigned int i = 0; i < this->err.size(); i++)
+				std::wcout << "[Error " << this->err[i].first << "] " << this->err[i].second << std::endl;
+		};
+		
 		// Virtual destructor
 		virtual ~Container()
 		{
-			std::wcout << "Removing all Container content...\n";
+			// Automatically report errors before deallocating memory
+			if(this->err.size() > 0)
+			{
+				std::wcout << L"Auto-generated error report" << std::endl;
+				this->reportErrors();
+				std::wcout << std::endl;
+			}
+			else
+			{
+				std::wcout << L"No errors\n" << std::endl;
+			}
+			
+			// Deallocate memory for everything
+			std::wcout << L"Removing all Container content..." << std::endl;
 		};
 };
 

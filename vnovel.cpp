@@ -438,12 +438,12 @@ int VNovel::buildVN()
 					esc.push_back(script.getPos() - start -  1);
 			}
 		}
-		
+		/*
 		for(unsigned int k = 0; k < kwlist.size(); k++)
 			std::wcout << "(" << kwlist[k].first << ", " << kwlist[k].second << ") ";
 		
 		std::wcout << "\n";
-		
+		*/
 		// Process the tokens found on this line
 		for(unsigned int s = 0; s < kwlist.size(); s++)
 		{
@@ -488,7 +488,7 @@ int VNovel::buildVN()
 					}
 					else
 					{
-						std::wcout << NO_KEYWORD_ERR_1 << "Component" << NO_KEYWORD_ERR_2 << kwlist[s].second << std::endl;
+						std::wcout << NO_KEYWORD_ERR_1 << L"Component" << NO_KEYWORD_ERR_2 << kwlist[s].second << std::endl;
 						return NO_KEYWORD;
 					}
 					
@@ -517,7 +517,7 @@ int VNovel::buildVN()
 					}
 					else
 					{
-						std::wcout << NO_KEYWORD_ERR_1 << "VNObject" << NO_KEYWORD_ERR_2 << kwlist[s].second << std::endl;
+						std::wcout << NO_KEYWORD_ERR_1 << L"VNObject" << NO_KEYWORD_ERR_2 << kwlist[s].second << std::endl;
 						return NO_KEYWORD;
 					}
 					

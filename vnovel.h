@@ -154,17 +154,28 @@ class VNovel
 		};
 		
 		// Display all error messages
-		int reportErrors()
+		void reportErrors()
 		{
 			for(unsigned int i = 0; i < this->err.size(); i++)
-				std::wcout << this->err[i] << "\n";
-			
-			return 0;
+				std::wcout << L"[Error " << this->err[i] << L"] " << this->err[i] << std::endl;
 		};
 		
 		/* Destructor */
 		~VNovel()
 		{
+			// Automatically report errors before deallocating memory
+			if(this->err.size() > 0)
+			{
+				std::wcout << L"Auto-generated error report" << std::endl;
+				this->reportErrors();
+				std::wcout << std::endl;
+			}
+			else
+			{
+				std::wcout << L"No errors\n" << std::endl;
+			}
+			
+			// Deallocate memory for everything
 			for(unsigned int i = 0; i < this->cont.size(); i++)
 			{
 				delete this->cont[i];
