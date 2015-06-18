@@ -14,12 +14,17 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+// Libraries for "Press ENTER to continue..."
+#include <limits>
 
 // Base files
 #include "base/keywords.h"
 #include "base/container_base/container.h"
 #include "base/component_base/component.h"
 #include "base/vnobject_base/vnobject.h"
+
+// Read UTF files
+#include "base/utfread/utf8read.h"
 
 // Parser
 #include "base/pda/pda.h"

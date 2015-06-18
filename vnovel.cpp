@@ -1,22 +1,7 @@
 /* Imports */
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <map>
-
-// Locale tools
-#include <locale>
-#include <stdio.h>
-#include <fcntl.h>
-
-// Libraries for "Press ENTER to continue..."
-#include <limits>
-
 // Class header
 #include "vnovel.h"
-
 
 /* Global variables */
 
@@ -83,7 +68,6 @@ int addToVNObjects(std::wstring kw, buildF b)
 std::wstring escape(std::wstring token, std::vector<unsigned int> e)
 {
 	std::wstring out;
-	unsigned int start = 0;
 	
 	if(e.size() > 0)
 	{
@@ -92,23 +76,14 @@ std::wstring escape(std::wstring token, std::vector<unsigned int> e)
 		{
 			if(i == e[j])
 			{
-				// Save the part before the escape character
-				std::wstring temp = token.substr(start, e[j] - start);
-				out = out + temp;
-				
-				// Update
-				j += 1;
-				start = i + 2;
-				
 				// Handle standard escape characters
-				if(start - 1 < token.length())
+				if(i + 1 < token.length())
 				{
-					switch(token.at(start - 1))
+					switch(token[i + 1])
 					{
 						// Escape character itself
 						case L'\\':
 							out = out + L'\\';
-							j += 1;
 							break;
 						
 						// Backspace
@@ -143,18 +118,21 @@ std::wstring escape(std::wstring token, std::vector<unsigned int> e)
 						
 						// All other cases (include in the next set)
 						default:
-							out += token.at(start - 1);
+							out += token[i + 1];
 							break;
 					}
+					
+					i += 1;
+					j += 1;
 				}
-				
-				// Check if done
-				if(j >= e.size())
+				else
 				{
-					i = token.length();
-					temp = token.substr(start, i - start);
-					out = out + temp;
+					// Ignore it
 				}
+			}
+			else
+			{
+				out += token[i];
 			}
 		}
 	}
@@ -179,16 +157,17 @@ std::wstring strip(std::wstring token)
 	// Go through the token to find the real start and end points
 	for(unsigned int i = 0; i < token.length(); i++)
 	{
+		// Determine whether or not a character is ignored
+		bool in_ign = false;
+		for(unsigned int j = 0; j < ign.size(); j++)
+		{
+			// in_ign will be true if any of the characters in the vector ign matches the current character
+			in_ign = ( (token[i] == ign[j]) || in_ign );
+		}
+		
+		// Set starting and ending points
 		if(!start_set)
 		{
-			// Find the start point first
-			bool in_ign = false;
-			for(unsigned int j = 0; j < ign.size(); j++)
-			{
-				// in_ign will be true if any of the characters in the vector ign matches the current character
-				in_ign = ( (token.at(i) == ign[j]) || in_ign );
-			}
-			
 			// The first character that is not in the ignore list is the real start
 			if(!in_ign)
 			{
@@ -200,18 +179,12 @@ std::wstring strip(std::wstring token)
 		else
 		{
 			// Then find the end point
-			for(unsigned int j = 0; j < ign.size(); j++)
+			if(!in_ign)
 			{
-				// Whenever an ignored character is found, set end
-				if( token.at(i) == ign[j] )
-				{
-					end = i - 1;
-					j = ign.size();
-				}
+				end = i;
 			}
 		}
 	}
-	
 	// Evaluate output
 	if(!start_set)
 	{
@@ -341,7 +314,7 @@ VNovel::VNovel(std::string src)
 // Builds VN from script file
 int VNovel::buildVN()
 {
-	std::wifstream ifile;
+	std::ifstream ifile;
 	try
 	{
 		ifile.open(this->source);
@@ -353,8 +326,10 @@ int VNovel::buildVN()
 	
 	std::wstring line;
 	unsigned int lcount;
-	while( getline(ifile, line) && line.length() > 0)
+	while( !ifile.eof() )
 	{
+		line = fReadUTF8(ifile);
+		
 		// PDA, noisy enabled
 		PDA<std::wstring> script (line, delim, false);
 		
@@ -416,7 +391,7 @@ int VNovel::buildVN()
 				esc.clear();
 				
 				// Strip this token if it is not a TXT_TOKEN
-				if( line.at( script.getPos() - 1 ) == delim[TXT_TOKEN] )
+				if( line[script.getPos() - 1] != delim[TXT_TOKEN] )
 				{
 					final_token = strip(final_token);
 				}
@@ -438,12 +413,7 @@ int VNovel::buildVN()
 					esc.push_back(script.getPos() - start -  1);
 			}
 		}
-		/*
-		for(unsigned int k = 0; k < kwlist.size(); k++)
-			std::wcout << "(" << kwlist[k].first << ", " << kwlist[k].second << ") ";
 		
-		std::wcout << "\n";
-		*/
 		// Process the tokens found on this line
 		for(unsigned int s = 0; s < kwlist.size(); s++)
 		{
